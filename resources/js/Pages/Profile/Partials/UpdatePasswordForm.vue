@@ -37,22 +37,22 @@ const updatePassword = () => {
     <section>
         <header class="mb-6">
             <div class="flex items-center gap-2 mb-2">
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-display font-black tracking-wider uppercase bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 -skew-x-6">
-                    <span class="transform skew-x-6">KEAMANAN AKUN</span>
+                <span class="court-badge-volt text-[10px] py-0.5">
+                    <span>KEAMANAN AKUN</span>
                 </span>
-                <span class="text-xs text-slate-400 font-medium">Password Management</span>
+                <span class="text-xs text-courtSlate-400 font-medium">Manajemen Sandi</span>
             </div>
-            <h2 class="text-xl sm:text-2xl font-display font-black tracking-tight text-white uppercase italic">
+            <h2 class="text-xl sm:text-2xl font-display font-black tracking-tight text-courtSlate-900 uppercase">
                 Perbarui Kata Sandi
             </h2>
-            <p class="mt-1 text-xs sm:text-sm text-slate-400 font-medium">
-                Pastikan akun Anda terlindungi dengan menggunakan kata sandi yang panjang dan aman.
+            <p class="mt-1 text-xs sm:text-sm text-courtSlate-500 font-medium leading-relaxed">
+                Pastikan akun Anda terlindungi dengan menggunakan kata sandi yang kuat dan aman.
             </p>
         </header>
 
-        <form @submit.prevent="updatePassword" class="space-y-5">
+        <form @submit.prevent="updatePassword" class="space-y-5 max-w-2xl">
             <div>
-                <InputLabel for="current_password" value="Kata Sandi Saat Ini" />
+                <InputLabel for="current_password" value="Kata Sandi Saat Ini" variant="light" />
 
                 <TextInput
                     id="current_password"
@@ -62,17 +62,18 @@ const updatePassword = () => {
                     class="mt-1 block w-full"
                     autocomplete="current-password"
                     placeholder="••••••••"
+                    variant="light"
                 />
 
                 <InputError
                     :message="form.errors.current_password"
-                    class="mt-2"
+                    class="mt-1.5"
                 />
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <InputLabel for="password" value="Kata Sandi Baru" />
+                    <InputLabel for="password" value="Kata Sandi Baru" variant="light" />
 
                     <TextInput
                         id="password"
@@ -82,15 +83,17 @@ const updatePassword = () => {
                         class="mt-1 block w-full"
                         autocomplete="new-password"
                         placeholder="••••••••"
+                        variant="light"
                     />
 
-                    <InputError :message="form.errors.password" class="mt-2" />
+                    <InputError :message="form.errors.password" class="mt-1.5" />
                 </div>
 
                 <div>
                     <InputLabel
                         for="password_confirmation"
                         value="Konfirmasi Kata Sandi Baru"
+                        variant="light"
                     />
 
                     <TextInput
@@ -100,11 +103,12 @@ const updatePassword = () => {
                         class="mt-1 block w-full"
                         autocomplete="new-password"
                         placeholder="••••••••"
+                        variant="light"
                     />
 
                     <InputError
                         :message="form.errors.password_confirmation"
-                        class="mt-2"
+                        class="mt-1.5"
                     />
                 </div>
             </div>
@@ -123,7 +127,7 @@ const updatePassword = () => {
                 >
                     <span
                         v-if="form.recentlySuccessful"
-                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold"
                     >
                         ✓ Kata sandi berhasil diperbarui.
                     </span>

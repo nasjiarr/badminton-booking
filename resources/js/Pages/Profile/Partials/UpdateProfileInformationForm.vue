@@ -26,25 +26,25 @@ const form = useForm({
     <section>
         <header class="mb-6">
             <div class="flex items-center gap-2 mb-2">
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-display font-black tracking-wider uppercase bg-volt/10 text-volt border border-volt/30 -skew-x-6">
-                    <span class="transform skew-x-6">IDENTITAS PENGGUNA</span>
+                <span class="court-badge-volt text-[10px] py-0.5">
+                    <span>IDENTITAS PENGGUNA</span>
                 </span>
-                <span class="text-xs text-slate-400 font-medium">Akun Member</span>
+                <span class="text-xs text-courtSlate-400 font-medium">Akun Member</span>
             </div>
-            <h2 class="text-xl sm:text-2xl font-display font-black tracking-tight text-white uppercase italic">
+            <h2 class="text-xl sm:text-2xl font-display font-black tracking-tight text-courtSlate-900 uppercase">
                 Informasi Profil Member
             </h2>
-            <p class="mt-1 text-xs sm:text-sm text-slate-400 font-medium">
+            <p class="mt-1 text-xs sm:text-sm text-courtSlate-500 font-medium leading-relaxed">
                 Perbarui nama akun dan alamat email Anda untuk menerima konfirmasi booking dan bukti invoice pembayaran.
             </p>
         </header>
 
         <form
             @submit.prevent="form.patch(route('profile.update'))"
-            class="space-y-5"
+            class="space-y-5 max-w-2xl"
         >
             <div>
-                <InputLabel for="name" value="Nama Lengkap" />
+                <InputLabel for="name" value="Nama Lengkap" variant="light" />
 
                 <TextInput
                     id="name"
@@ -55,13 +55,14 @@ const form = useForm({
                     autofocus
                     autocomplete="name"
                     placeholder="Nama Lengkap Anda"
+                    variant="light"
                 />
 
-                <InputError class="mt-2" :message="form.errors.name" />
+                <InputError class="mt-1.5" :message="form.errors.name" />
             </div>
 
             <div>
-                <InputLabel for="email" value="Alamat Email" />
+                <InputLabel for="email" value="Alamat Email" variant="light" />
 
                 <TextInput
                     id="email"
@@ -71,20 +72,21 @@ const form = useForm({
                     required
                     autocomplete="username"
                     placeholder="nama@email.com"
+                    variant="light"
                 />
 
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError class="mt-1.5" :message="form.errors.email" />
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
-                <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-300">
+                <div class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900">
                     <p class="font-semibold">
                         Alamat email Anda belum terverifikasi.
                         <Link
                             :href="route('verification.send')"
                             method="post"
                             as="button"
-                            class="ml-1 text-volt underline hover:text-white font-bold transition"
+                            class="ml-1 text-courtOrange underline hover:text-courtOrange-hover font-bold transition"
                         >
                             Klik di sini untuk mengirim ulang email verifikasi.
                         </Link>
@@ -92,7 +94,7 @@ const form = useForm({
 
                     <div
                         v-show="status === 'verification-link-sent'"
-                        class="mt-2 font-medium text-emerald-400"
+                        class="mt-2 font-medium text-emerald-700"
                     >
                         ✓ Tautan verifikasi baru telah dikirimkan ke alamat email Anda.
                     </div>
@@ -113,7 +115,7 @@ const form = useForm({
                 >
                     <span
                         v-if="form.recentlySuccessful"
-                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold"
                     >
                         ✓ Perubahan berhasil disimpan.
                     </span>
