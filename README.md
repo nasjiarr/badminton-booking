@@ -7,6 +7,7 @@ Sistem booking lapangan badminton online. Dibangun dengan Laravel 12, Inertia.js
 | Layer      | Technology                         |
 |------------|------------------------------------|
 | Backend    | Laravel 12 (PHP 8.4)               |
+| Real-Time  | Laravel Reverb + Laravel Echo      |
 | Frontend   | Vue 3 + Inertia.js 2               |
 | Styling    | Tailwind CSS 4                     |
 | Build Tool | Vite 6                             |
@@ -74,26 +75,34 @@ php artisan serve
 
 # Terminal 2: Frontend (Vite dev server)
 npm run dev
+
+# Terminal 3: WebSocket Server (Real-Time Booking)
+php artisan reverb:start
 ```
 
 Buka browser: [http://localhost:8000](http://localhost:8000)
 
 ## Default Credentials
 
-| Role  | Email                  | Password   |
-|-------|------------------------|------------|
-| Admin | admin@badminton.test   | password   |
+| Role   | Email                  | Password   |
+|--------|------------------------|------------|
+| Admin  | admin@badminton.test   | password   |
+| User 1 | user@badminton.test    | password   |
+| User 2 | user2@badminton.test   | password   |
 
 ## Struktur Folder Frontend
 
 ```
 resources/js/
 ├── Components/     # Reusable Vue components
-├── Layouts/        # Layout templates (AuthenticatedLayout, GuestLayout)
+├── Layouts/        # Layout templates (AuthenticatedLayout, AdminLayout, GuestLayout)
 ├── Pages/          # Inertia pages (route-based)
+│   ├── Admin/      # Courts CRUD Admin
 │   ├── Auth/       # Login, Register, dll
+│   ├── Bookings/   # Create Booking & My Bookings (Real-Time)
 │   ├── Profile/    # Profile management
 │   └── Dashboard.vue
+├── echo.js         # Laravel Echo & Reverb WebSocket client
 └── app.js          # Entry point
 ```
 
@@ -102,6 +111,9 @@ resources/js/
 ```bash
 # Jalankan dev server (hot reload)
 npm run dev
+
+# Jalankan WebSocket server Reverb
+php artisan reverb:start
 
 # Build untuk production
 npm run build

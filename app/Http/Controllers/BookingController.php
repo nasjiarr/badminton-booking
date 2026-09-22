@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BookingCancelled;
+use App\Events\BookingCreated;
 use App\Http\Requests\StoreBookingRequest;
 use App\Models\Booking;
 use App\Models\Court;
@@ -223,6 +225,8 @@ class BookingController extends Controller
             ]);
         });
 
+        event(new BookingCreated($booking));
+
         return redirect()->route('my-bookings.index')
             ->with('success', 'Booking berhasil dibuat! Status saat ini menunggu pembayaran (pending).');
     }
@@ -280,6 +284,8 @@ class BookingController extends Controller
         $booking->update([
             'status' => 'cancelled',
         ]);
+
+        event(new BookingCancelled($booking));
 
         return redirect()->back()
             ->with('success', "Booking #{$booking->id} berhasil dibatalkan.");

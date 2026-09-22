@@ -3,8 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { Head, useForm } from '@inertiajs/vue3';
-import { computed, onMounted, ref, watch } from 'vue';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps({
     courts: Array,
@@ -12,12 +12,109 @@ const props = defineProps({
     initialDate: String,
 });
 
+const page = usePage();
+const currentUserId = computed(() => page.props.auth.user?.id);
+
 const selectedCourtId = ref(props.initialCourtId || props.courts[0]?.id || null);
 const selectedDate = ref(props.initialDate || new Date().toISOString().split('T')[0]);
 const slots = ref([]);
 const loadingSlots = ref(false);
 const selectedSlotTimes = ref([]); // array of 'HH:mm' start_times
 const notes = ref('');
+const realtimeNotification = ref('');
+
+let currentChannelId = null;
+let notificationTimeout = null;
+
+const showRealtimeAlert = (msg) => {
+    realtimeNotification.value = msg;
+    if (notificationTimeout) clearTimeout(notificationTimeout);
+    notificationTimeout = setTimeout(() => {
+        realtimeNotification.value = '';
+    }, 4500);
+};
+
+const subscribeToRealtimeChannel = (courtId) => {
+    if (!courtId || typeof window === 'undefined' || !window.Echo) return;
+
+    if (currentChannelId) {
+        window.Echo.leave(`court.${currentChannelId}`);
+    }
+
+    currentChannelId = courtId;
+
+    window.Echo.channel(`court.${courtId}`)
+        .listen('.BookingCreated', (e) => {
+            handleBookingCreatedRealtime(e);
+        })
+        .listen('BookingCreated', (e) => {
+            handleBookingCreatedRealtime(e);
+        })
+        .listen('.BookingCancelled', (e) => {
+            handleBookingCancelledRealtime(e);
+        })
+        .listen('BookingCancelled', (e) => {
+            handleBookingCancelledRealtime(e);
+        });
+};
+
+const handleBookingCreatedRealtime = (e) => {
+    if (Number(e.court_id) !== Number(selectedCourtId.value) || e.booking_date !== selectedDate.value) {
+        return;
+    }
+
+    let conflictDetected = false;
+
+    slots.value = slots.value.map((slot) => {
+        if (slot.start_time >= e.start_time && slot.end_time <= e.end_time) {
+            if (selectedSlotTimes.value.includes(slot.start_time)) {
+                conflictDetected = true;
+            }
+
+            return {
+                ...slot,
+                status: Number(e.user_id) === Number(currentUserId.value) ? 'mine' : 'booked',
+                booking_id: e.booking_id,
+            };
+        }
+        return slot;
+    });
+
+    if (conflictDetected) {
+        selectedSlotTimes.value = selectedSlotTimes.value.filter((time) => {
+            return !(time >= e.start_time && time < e.end_time);
+        });
+        showRealtimeAlert(`⚠️ Slot ${e.start_time} - ${e.end_time} baru saja dipesan oleh pengguna lain dan dihapus dari pilihan Anda.`);
+    } else {
+        showRealtimeAlert(`⚡ Slot ${e.start_time} - ${e.end_time} baru saja dipesan.`);
+    }
+};
+
+const handleBookingCancelledRealtime = (e) => {
+    if (Number(e.court_id) !== Number(selectedCourtId.value) || e.booking_date !== selectedDate.value) {
+        return;
+    }
+
+    const isToday = selectedDate.value === todayString;
+    const currentTime = new Date().toTimeString().slice(0, 5);
+
+    slots.value = slots.value.map((slot) => {
+        if (slot.start_time >= e.start_time && slot.end_time <= e.end_time) {
+            let newStatus = 'available';
+            if (isToday && slot.start_time <= currentTime) {
+                newStatus = 'past';
+            }
+            return {
+                ...slot,
+                status: newStatus,
+                booking_id: null,
+            };
+        }
+        return slot;
+    });
+
+    showRealtimeAlert(`🔄 Slot ${e.start_time} - ${e.end_time} baru saja dibatalkan dan kini tersedia kembali.`);
+};
 
 const selectedCourt = computed(() => {
     return props.courts.find((c) => c.id === selectedCourtId.value);
@@ -86,12 +183,27 @@ const fetchAvailability = async () => {
     }
 };
 
-watch([selectedCourtId, selectedDate], () => {
+watch(selectedCourtId, (newCourtId) => {
+    subscribeToRealtimeChannel(newCourtId);
+    fetchAvailability();
+});
+
+watch(selectedDate, () => {
     fetchAvailability();
 });
 
 onMounted(() => {
     fetchAvailability();
+    subscribeToRealtimeChannel(selectedCourtId.value);
+});
+
+onUnmounted(() => {
+    if (currentChannelId && window.Echo) {
+        window.Echo.leave(`court.${currentChannelId}`);
+    }
+    if (notificationTimeout) {
+        clearTimeout(notificationTimeout);
+    }
 });
 
 // Slot selection handling ensuring consecutive slots
@@ -381,15 +493,25 @@ const submitBooking = () => {
                 <!-- STEP 3: GRID SLOT JAM -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-3">
                             <span class="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-600 text-white font-bold text-sm">
                                 3
                             </span>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900">
-                                    Pilih Slot Jam
-                                </h3>
-                                <p class="text-xs text-gray-500">
+                                <div class="flex items-center gap-2.5">
+                                    <h3 class="text-lg font-bold text-gray-900">
+                                        Pilih Slot Jam
+                                    </h3>
+                                    <!-- Live Real-Time Indicator Badge -->
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-700 shadow-xs" title="Pembaruan ketersediaan slot aktif secara langsung">
+                                        <span class="relative flex h-2 w-2">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        </span>
+                                        <span>LIVE REAL-TIME</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-0.5">
                                     Klik slot untuk memilih. Anda bisa memilih beberapa slot berurutan.
                                 </p>
                             </div>
@@ -415,6 +537,36 @@ const submitBooking = () => {
                             </div>
                         </div>
                     </div>
+
+                    <!-- Realtime Notification Banner -->
+                    <Transition
+                        enter-active-class="transition ease-out duration-300 transform"
+                        enter-from-class="-translate-y-2 opacity-0"
+                        enter-to-class="translate-y-0 opacity-100"
+                        leave-active-class="transition ease-in duration-200"
+                        leave-from-class="opacity-100"
+                        leave-to-class="opacity-0"
+                    >
+                        <div
+                            v-if="realtimeNotification"
+                            class="mb-4 flex items-center justify-between rounded-lg bg-indigo-50 border border-indigo-200 px-4 py-2.5 text-xs sm:text-sm text-indigo-900 shadow-xs"
+                        >
+                            <div class="flex items-center gap-2">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+                                </span>
+                                <span>{{ realtimeNotification }}</span>
+                            </div>
+                            <button
+                                type="button"
+                                @click="realtimeNotification = ''"
+                                class="text-indigo-400 hover:text-indigo-600 font-bold ml-2 text-base leading-none"
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    </Transition>
 
                     <!-- Loading State -->
                     <div v-if="loadingSlots" class="py-12 flex flex-col items-center justify-center text-gray-400">
