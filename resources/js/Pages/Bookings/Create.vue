@@ -509,6 +509,88 @@ const submitBooking = () => {
                             </div>
                         </div>
                     </div>
+
+                    <!-- DETAIL LAPANGAN TERPILIH (EDITORIAL SHOWCASE) -->
+                    <div v-if="selectedCourt" class="mt-6 rounded-2xl bg-white border-2 border-courtSlate-200 p-6 sm:p-8 shadow-card-elevated">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                            <!-- Enlarged Photo View -->
+                            <div class="lg:col-span-5 relative h-56 sm:h-64 rounded-xl overflow-hidden bg-arena-card border border-courtSlate-200 shadow-sm group">
+                                <img
+                                    v-if="selectedCourt.image_url"
+                                    :src="selectedCourt.image_url"
+                                    :alt="selectedCourt.name"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                                />
+                                <div v-else class="w-full h-full flex flex-col items-center justify-center text-courtSlate-400">
+                                    <svg class="h-16 w-16 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    <span class="text-xs font-display font-bold uppercase tracking-wider text-courtSlate-400">Foto Lapangan PBSI</span>
+                                </div>
+                                <div class="absolute top-3 left-3 flex items-center gap-2">
+                                    <span class="court-badge-volt text-xs shadow-md">
+                                        <span>{{ selectedCourt.name }} TERPILIH</span>
+                                    </span>
+                                </div>
+                                <div class="absolute bottom-3 right-3 bg-arena-base/80 backdrop-blur-xs text-volt px-2.5 py-1 rounded text-xs font-display font-black tracking-wider uppercase -skew-x-6">
+                                    <span class="inline-block transform skew-x-6">⭐ 4.9 / 5 (120+ Ulasan)</span>
+                                </div>
+                            </div>
+
+                            <!-- Editorial Info & Facilities -->
+                            <div class="lg:col-span-7 flex flex-col justify-between h-full space-y-4">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1.5">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-display font-black uppercase tracking-wider bg-courtSlate-100 text-courtSlate-700">
+                                            SPESIFIKASI GELANGGANG
+                                        </span>
+                                        <span class="text-xs text-courtSlate-400 font-semibold">• BWF Approved Surface</span>
+                                    </div>
+                                    <h3 class="font-display font-black text-2xl sm:text-3xl text-courtSlate-900 uppercase tracking-tight">
+                                        {{ selectedCourt.name }} — Gelanggang Resmi PBSI
+                                    </h3>
+                                    <p class="text-xs sm:text-sm text-courtSlate-600 mt-2 leading-relaxed">
+                                        {{ selectedCourt.description || 'Lapangan badminton profesional dengan karpet vinyl impor berdaya redam tinggi untuk kenyamanan sendi lutut dan grip sepatu maksimal. Dilengkapi garis lapangan presisi standar turnamen nasional PBSI.' }}
+                                    </p>
+                                </div>
+
+                                <!-- Facilities Grid -->
+                                <div>
+                                    <span class="block text-[11px] font-display font-bold uppercase tracking-wider text-courtSlate-400 mb-2">
+                                        Fasilitas Unggulan Lapangan:
+                                    </span>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-courtSlate-50 border border-courtSlate-100 text-xs font-bold text-courtSlate-800">
+                                            <span class="text-volt-deep font-black">✓</span> Karpet Vinyl 4.5mm
+                                        </div>
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-courtSlate-50 border border-courtSlate-100 text-xs font-bold text-courtSlate-800">
+                                            <span class="text-volt-deep font-black">✓</span> LED 500 Lux Anti-Silau
+                                        </div>
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-courtSlate-50 border border-courtSlate-100 text-xs font-bold text-courtSlate-800">
+                                            <span class="text-volt-deep font-black">✓</span> Kursi Wasit & Pemain
+                                        </div>
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-courtSlate-50 border border-courtSlate-100 text-xs font-bold text-courtSlate-800">
+                                            <span class="text-volt-deep font-black">✓</span> Exhaust Blower Air
+                                        </div>
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-courtSlate-50 border border-courtSlate-100 text-xs font-bold text-courtSlate-800">
+                                            <span class="text-volt-deep font-black">✓</span> Digital Scoreboard
+                                        </div>
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-courtSlate-50 border border-courtSlate-100 text-xs font-bold text-courtSlate-800">
+                                            <span class="text-volt-deep font-black">✓</span> Stopkontak & Dispenser
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Bottom Price Summary -->
+                                <div class="pt-3 border-t border-courtSlate-100 flex items-center justify-between">
+                                    <span class="text-xs text-courtSlate-500 font-medium">Tarif sewa reguler:</span>
+                                    <span class="athletic-number text-2xl font-black text-courtSlate-900">
+                                        {{ formatPrice(selectedCourt.price_per_hour) }} <span class="text-xs font-normal text-courtSlate-500">/jam</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- STEP 2: PILIH TANGGAL -->
@@ -741,57 +823,70 @@ const submitBooking = () => {
                 </div>
 
                 <!-- STEP 4: RINGKASAN BOOKING & KONFIRMASI -->
-                <div class="bg-white rounded-xl shadow-md border border-indigo-100 overflow-hidden">
-                    <div class="bg-indigo-600 px-6 py-4 text-white flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="flex items-center justify-center w-7 h-7 rounded-full bg-white text-indigo-600 font-bold text-sm">
-                                4
+                <div class="rounded-2xl border-2 border-courtSlate-200 bg-white shadow-card-elevated overflow-hidden">
+                    <div class="bg-gradient-to-r from-arena-card via-slate-900 to-arena-base px-6 sm:px-8 py-5 text-white flex items-center justify-between border-b border-arena-border">
+                        <div class="flex items-center gap-3">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-volt text-arena-base font-display font-black text-sm shadow-xs -skew-x-3">
+                                <span class="transform skew-x-3">4</span>
                             </span>
-                            <h3 class="text-base font-bold">
-                                Ringkasan Pemesanan
-                            </h3>
+                            <div>
+                                <h3 class="font-display font-black text-xl uppercase tracking-tight text-white">
+                                    Ringkasan Pemesanan & Pembayaran
+                                </h3>
+                                <p class="text-xs text-courtSlate-400 font-medium">Periksa detail jadwal sebelum melanjutkan ke simulasi pembayaran</p>
+                            </div>
                         </div>
-                        <span v-if="totalHours > 0" class="text-xs bg-indigo-700 px-2.5 py-1 rounded-full font-medium">
-                            {{ totalHours }} Jam Terpilih
+                        <span v-if="totalHours > 0" class="inline-flex items-center px-3 py-1 rounded text-xs font-display font-black uppercase tracking-wider bg-volt/20 text-volt border border-volt/40 -skew-x-6">
+                            <span class="transform skew-x-6">{{ totalHours }} Jam Terpilih</span>
                         </span>
                     </div>
 
-                    <div class="p-6">
+                    <div class="p-6 sm:p-8">
                         <div v-if="totalHours > 0" class="space-y-6">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pb-6 border-b border-gray-100">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 p-5 rounded-2xl bg-courtSlate-50 border border-courtSlate-200">
                                 <div>
-                                    <span class="text-xs text-gray-500 font-medium">Lapangan:</span>
-                                    <p class="text-base font-bold text-gray-900 mt-0.5">
+                                    <span class="block text-xs font-display font-bold uppercase tracking-wider text-courtSlate-500 mb-1">
+                                        Lapangan
+                                    </span>
+                                    <p class="font-display font-black text-xl text-courtSlate-900 uppercase">
                                         {{ selectedCourt?.name }}
                                     </p>
+                                    <span class="text-[11px] text-courtSlate-500 font-medium">Standar PBSI</span>
                                 </div>
                                 <div>
-                                    <span class="text-xs text-gray-500 font-medium">Tanggal:</span>
-                                    <p class="text-base font-bold text-gray-900 mt-0.5">
+                                    <span class="block text-xs font-display font-bold uppercase tracking-wider text-courtSlate-500 mb-1">
+                                        Tanggal Main
+                                    </span>
+                                    <p class="font-display font-bold text-base text-courtSlate-900">
                                         {{ formatDateIndonesian(selectedDate) }}
                                     </p>
+                                    <span class="text-[11px] text-courtSlate-500 font-medium">{{ selectedDayName }}</span>
                                 </div>
                                 <div>
-                                    <span class="text-xs text-gray-500 font-medium">Waktu Sewa:</span>
-                                    <p class="text-base font-bold text-indigo-600 mt-0.5">
-                                        {{ bookingStartTime }} - {{ bookingEndTime }}
-                                        <span class="text-xs font-normal text-gray-500">({{ totalHours }} jam)</span>
+                                    <span class="block text-xs font-display font-bold uppercase tracking-wider text-courtSlate-500 mb-1">
+                                        Waktu & Durasi
+                                    </span>
+                                    <p class="font-display font-black text-lg text-courtSlate-900">
+                                        {{ bookingStartTime }} - {{ bookingEndTime }} WIB
                                     </p>
+                                    <span class="text-xs font-semibold text-courtSlate-500">({{ totalHours }} jam sesi)</span>
                                 </div>
                                 <div>
-                                    <span class="text-xs text-gray-500 font-medium">Total Tarif:</span>
-                                    <div class="mt-0.5">
-                                        <div v-if="discountPercentage > 0" class="flex items-center gap-1.5 text-xs text-slate-500">
-                                            <span class="line-through">{{ formatPrice(rawTotalPrice) }}</span>
-                                            <span class="px-1.5 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-100 text-emerald-800">
-                                                -{{ discountPercentage }}% {{ userTier.toUpperCase() }}
+                                    <span class="block text-xs font-display font-bold uppercase tracking-wider text-courtSlate-500 mb-1">
+                                        Total Biaya
+                                    </span>
+                                    <div>
+                                        <div v-if="discountPercentage > 0" class="flex items-center gap-1.5 mb-1">
+                                            <span class="line-through text-xs font-semibold text-courtSlate-400">{{ formatPrice(rawTotalPrice) }}</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-display font-black uppercase tracking-wider bg-volt/30 text-arena-base border border-volt/50 -skew-x-6">
+                                                <span class="transform skew-x-6">-{{ discountPercentage }}% {{ userTier.toUpperCase() }}</span>
                                             </span>
                                         </div>
-                                        <p class="text-xl font-extrabold text-emerald-600">
+                                        <div class="athletic-number text-3xl sm:text-4xl font-black text-courtSlate-900 tracking-tight">
                                             {{ formatPrice(totalPrice) }}
-                                        </p>
-                                        <span class="text-[10px] text-gray-400 font-medium">
-                                            +{{ Math.floor(totalPrice / 10000) }} Poin Loyalty
+                                        </div>
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 mt-0.5">
+                                            ✓ +{{ Math.floor(totalPrice / 10000) }} Poin Loyalty
                                         </span>
                                     </div>
                                 </div>
@@ -889,19 +984,19 @@ const submitBooking = () => {
                                     id="notes"
                                     v-model="notes"
                                     rows="2"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                    class="mt-1 block w-full rounded-xl border border-courtSlate-300 bg-white p-3 text-sm focus:border-volt focus:ring-1 focus:ring-volt"
                                     placeholder="Contoh: Tolong siapkan shuttlecock, atau request lainnya..."
                                 />
                                 <InputError class="mt-1" :message="form.errors.notes" />
                             </div>
 
                             <!-- Warning / Info -->
-                            <div class="rounded-lg bg-amber-50 p-4 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
-                                <svg class="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="rounded-xl bg-courtSlate-50 p-4 border border-courtSlate-200 text-xs text-courtSlate-700 flex items-start gap-2.5">
+                                <svg class="h-4 w-4 text-courtOrange flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <p>
-                                    Setelah menekan tombol <strong>Booking Sekarang</strong>, status booking akan berstatus <strong>Pending</strong> (menunggu pembayaran). Slot Anda aman dan terlindungi dari bentrok pesanan pengguna lain.
+                                <p class="leading-relaxed">
+                                    Setelah menekan tombol <strong>Lanjutkan ke Pembayaran</strong>, slot pilihan Anda langsung diamankan dengan status <strong>Pending</strong> selama 15 menit agar terlindungi dari pengguna lain.
                                 </p>
                             </div>
 
@@ -910,11 +1005,11 @@ const submitBooking = () => {
                                 <PrimaryButton
                                     @click="submitBooking"
                                     :disabled="form.processing"
-                                    class="px-6 py-3 text-sm font-bold bg-indigo-600 hover:bg-indigo-700"
+                                    class="px-8 py-3.5 text-sm sm:text-base font-display font-black uppercase tracking-wider bg-volt text-arena-base hover:bg-volt-hover shadow-volt-glow-sm transition -skew-x-3 cursor-pointer"
                                 >
                                     <span v-if="form.processing">Memproses Booking...</span>
                                     <span v-else-if="isRecurring">🏸 Booking Rutin {{ recurringSessionsCount }} Sesi ({{ formatPrice(totalRecurringPrice) }})</span>
-                                    <span v-else>🏸 Booking Sekarang ({{ formatPrice(totalPrice) }})</span>
+                                    <span v-else>🏸 Lanjutkan ke Pembayaran ({{ formatPrice(totalPrice) }})</span>
                                 </PrimaryButton>
                             </div>
                         </div>
