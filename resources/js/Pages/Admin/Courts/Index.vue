@@ -67,7 +67,7 @@ const formatPrice = (price) => {
 
         <div class="py-6">
             <div class="px-4 sm:px-6 lg:px-8">
-                <div class="overflow-hidden rounded-xl border-2 border-courtSlate-200 bg-white shadow-card-elevated">
+                <div class="overflow-x-auto rounded-xl border-2 border-courtSlate-200 bg-white shadow-card-elevated">
                     <table class="min-w-full divide-y-2 divide-courtSlate-200">
                         <thead class="bg-arena-base text-courtSlate-200">
                             <tr>

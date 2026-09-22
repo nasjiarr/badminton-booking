@@ -9,17 +9,17 @@ const model = defineModel({
 const input = ref(null);
 
 onMounted(() => {
-    if (input.value.hasAttribute('autofocus')) {
+    if (input.value?.hasAttribute('autofocus')) {
         input.value.focus();
     }
 });
 
-defineExpose({ focus: () => input.value.focus() });
+defineExpose({ focus: () => input.value?.focus() });
 </script>
 
 <template>
     <input
-        class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        class="w-full rounded-xl bg-slate-950/80 border border-slate-700/80 text-white placeholder-slate-500 px-4 py-2.5 text-sm font-medium focus:border-volt focus:ring-2 focus:ring-volt/20 focus:outline-none transition duration-150"
         v-model="model"
         ref="input"
     />

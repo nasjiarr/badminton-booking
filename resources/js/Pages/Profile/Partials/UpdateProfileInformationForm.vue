@@ -24,22 +24,27 @@ const form = useForm({
 
 <template>
     <section>
-        <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Profile Information
+        <header class="mb-6">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-display font-black tracking-wider uppercase bg-volt/10 text-volt border border-volt/30 -skew-x-6">
+                    <span class="transform skew-x-6">IDENTITAS PENGGUNA</span>
+                </span>
+                <span class="text-xs text-slate-400 font-medium">Akun Member</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-display font-black tracking-tight text-white uppercase italic">
+                Informasi Profil Member
             </h2>
-
-            <p class="mt-1 text-sm text-gray-600">
-                Update your account's profile information and email address.
+            <p class="mt-1 text-xs sm:text-sm text-slate-400 font-medium">
+                Perbarui nama akun dan alamat email Anda untuk menerima konfirmasi booking dan bukti invoice pembayaran.
             </p>
         </header>
 
         <form
             @submit.prevent="form.patch(route('profile.update'))"
-            class="mt-6 space-y-6"
+            class="space-y-5"
         >
             <div>
-                <InputLabel for="name" value="Name" />
+                <InputLabel for="name" value="Nama Lengkap" />
 
                 <TextInput
                     id="name"
@@ -49,13 +54,14 @@ const form = useForm({
                     required
                     autofocus
                     autocomplete="name"
+                    placeholder="Nama Lengkap Anda"
                 />
 
                 <InputError class="mt-2" :message="form.errors.name" />
             </div>
 
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" value="Alamat Email" />
 
                 <TextInput
                     id="email"
@@ -64,47 +70,53 @@ const form = useForm({
                     v-model="form.email"
                     required
                     autocomplete="username"
+                    placeholder="nama@email.com"
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
-                <p class="mt-2 text-sm text-gray-800">
-                    Your email address is unverified.
-                    <Link
-                        :href="route('verification.send')"
-                        method="post"
-                        as="button"
-                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Click here to re-send the verification email.
-                    </Link>
-                </p>
+                <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-300">
+                    <p class="font-semibold">
+                        Alamat email Anda belum terverifikasi.
+                        <Link
+                            :href="route('verification.send')"
+                            method="post"
+                            as="button"
+                            class="ml-1 text-volt underline hover:text-white font-bold transition"
+                        >
+                            Klik di sini untuk mengirim ulang email verifikasi.
+                        </Link>
+                    </p>
 
-                <div
-                    v-show="status === 'verification-link-sent'"
-                    class="mt-2 text-sm font-medium text-green-600"
-                >
-                    A new verification link has been sent to your email address.
+                    <div
+                        v-show="status === 'verification-link-sent'"
+                        class="mt-2 font-medium text-emerald-400"
+                    >
+                        ✓ Tautan verifikasi baru telah dikirimkan ke alamat email Anda.
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
+            <div class="flex items-center gap-4 pt-2">
+                <PrimaryButton :disabled="form.processing">
+                    <span v-if="form.processing">Menyimpan...</span>
+                    <span v-else>💾 SIMPAN PERUBAHAN</span>
+                </PrimaryButton>
 
                 <Transition
-                    enter-active-class="transition ease-in-out"
+                    enter-active-class="transition ease-in-out duration-200"
                     enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
+                    leave-active-class="transition ease-in-out duration-300"
                     leave-to-class="opacity-0"
                 >
-                    <p
+                    <span
                         v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold"
                     >
-                        Saved.
-                    </p>
+                        ✓ Perubahan berhasil disimpan.
+                    </span>
                 </Transition>
             </div>
         </form>

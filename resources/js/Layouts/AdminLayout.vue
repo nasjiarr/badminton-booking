@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import Toast from '@/Components/Toast.vue';
+import PwaInstallPrompt from '@/Components/PwaInstallPrompt.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 
@@ -49,6 +50,7 @@ const navigation = [
 <template>
     <div>
         <Toast />
+        <PwaInstallPrompt />
 
         <!-- Mobile sidebar overlay -->
         <div

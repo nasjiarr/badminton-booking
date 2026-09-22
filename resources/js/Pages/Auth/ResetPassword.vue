@@ -35,9 +35,25 @@ const submit = () => {
     <GuestLayout>
         <Head title="Reset Password" />
 
-        <form @submit.prevent="submit">
+        <!-- Header Info -->
+        <div class="mb-6">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-display font-black tracking-wider uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 -skew-x-6">
+                    <span class="transform skew-x-6">KATA SANDI BARU</span>
+                </span>
+                <span class="text-xs text-slate-400 font-medium">Security Update</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-display font-black tracking-tight text-white uppercase italic">
+                Buat Kata Sandi Baru
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1 font-medium">
+                Tentukan kata sandi baru untuk akun Smash Arena Anda.
+            </p>
+        </div>
+
+        <form @submit.prevent="submit" class="space-y-4">
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" value="Alamat Email" />
 
                 <TextInput
                     id="email"
@@ -52,8 +68,8 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+            <div>
+                <InputLabel for="password" value="Kata Sandi Baru" />
 
                 <TextInput
                     id="password"
@@ -62,15 +78,16 @@ const submit = () => {
                     v-model="form.password"
                     required
                     autocomplete="new-password"
+                    placeholder="••••••••"
                 />
 
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4">
+            <div>
                 <InputLabel
                     for="password_confirmation"
-                    value="Confirm Password"
+                    value="Konfirmasi Kata Sandi Baru"
                 />
 
                 <TextInput
@@ -80,6 +97,7 @@ const submit = () => {
                     v-model="form.password_confirmation"
                     required
                     autocomplete="new-password"
+                    placeholder="••••••••"
                 />
 
                 <InputError
@@ -88,12 +106,14 @@ const submit = () => {
                 />
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div class="pt-3">
                 <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
+                    class="w-full py-3 text-sm justify-center"
+                    :class="{ 'opacity-50 cursor-not-allowed': form.processing }"
                     :disabled="form.processing"
                 >
-                    Reset Password
+                    <span v-if="form.processing">Menyimpan Kata Sandi...</span>
+                    <span v-else>🔒 SIMPAN KATA SANDI BARU</span>
                 </PrimaryButton>
             </div>
         </form>

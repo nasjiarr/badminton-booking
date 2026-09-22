@@ -5,8 +5,22 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import { registerSW } from 'virtual:pwa-register';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+// Register PWA Service Worker
+if ('serviceWorker' in navigator) {
+    registerSW({
+        immediate: true,
+        onNeedRefresh() {
+            console.log('[Smash Arena PWA] Konten baru tersedia. Siap di-refresh.');
+        },
+        onOfflineReady() {
+            console.log('[Smash Arena PWA] Aplikasi siap digunakan secara offline.');
+        },
+    });
+}
+
+const appName = import.meta.env.VITE_APP_NAME || 'Smash Arena';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -22,6 +36,6 @@ createInertiaApp({
             .mount(el);
     },
     progress: {
-        color: '#4B5563',
+        color: '#CCFF00', // Smash Volt design token
     },
 });

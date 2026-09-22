@@ -22,11 +22,11 @@ const updatePassword = () => {
         onError: () => {
             if (form.errors.password) {
                 form.reset('password', 'password_confirmation');
-                passwordInput.value.focus();
+                passwordInput.value?.focus();
             }
             if (form.errors.current_password) {
                 form.reset('current_password');
-                currentPasswordInput.value.focus();
+                currentPasswordInput.value?.focus();
             }
         },
     });
@@ -35,20 +35,24 @@ const updatePassword = () => {
 
 <template>
     <section>
-        <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Update Password
+        <header class="mb-6">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-display font-black tracking-wider uppercase bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 -skew-x-6">
+                    <span class="transform skew-x-6">KEAMANAN AKUN</span>
+                </span>
+                <span class="text-xs text-slate-400 font-medium">Password Management</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-display font-black tracking-tight text-white uppercase italic">
+                Perbarui Kata Sandi
             </h2>
-
-            <p class="mt-1 text-sm text-gray-600">
-                Ensure your account is using a long, random password to stay
-                secure.
+            <p class="mt-1 text-xs sm:text-sm text-slate-400 font-medium">
+                Pastikan akun Anda terlindungi dengan menggunakan kata sandi yang panjang dan aman.
             </p>
         </header>
 
-        <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
+        <form @submit.prevent="updatePassword" class="space-y-5">
             <div>
-                <InputLabel for="current_password" value="Current Password" />
+                <InputLabel for="current_password" value="Kata Sandi Saat Ini" />
 
                 <TextInput
                     id="current_password"
@@ -57,6 +61,7 @@ const updatePassword = () => {
                     type="password"
                     class="mt-1 block w-full"
                     autocomplete="current-password"
+                    placeholder="••••••••"
                 />
 
                 <InputError
@@ -65,56 +70,63 @@ const updatePassword = () => {
                 />
             </div>
 
-            <div>
-                <InputLabel for="password" value="New Password" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <InputLabel for="password" value="Kata Sandi Baru" />
 
-                <TextInput
-                    id="password"
-                    ref="passwordInput"
-                    v-model="form.password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    autocomplete="new-password"
-                />
+                    <TextInput
+                        id="password"
+                        ref="passwordInput"
+                        v-model="form.password"
+                        type="password"
+                        class="mt-1 block w-full"
+                        autocomplete="new-password"
+                        placeholder="••••••••"
+                    />
 
-                <InputError :message="form.errors.password" class="mt-2" />
+                    <InputError :message="form.errors.password" class="mt-2" />
+                </div>
+
+                <div>
+                    <InputLabel
+                        for="password_confirmation"
+                        value="Konfirmasi Kata Sandi Baru"
+                    />
+
+                    <TextInput
+                        id="password_confirmation"
+                        v-model="form.password_confirmation"
+                        type="password"
+                        class="mt-1 block w-full"
+                        autocomplete="new-password"
+                        placeholder="••••••••"
+                    />
+
+                    <InputError
+                        :message="form.errors.password_confirmation"
+                        class="mt-2"
+                    />
+                </div>
             </div>
 
-            <div>
-                <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
-                />
-
-                <TextInput
-                    id="password_confirmation"
-                    v-model="form.password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    autocomplete="new-password"
-                />
-
-                <InputError
-                    :message="form.errors.password_confirmation"
-                    class="mt-2"
-                />
-            </div>
-
-            <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
+            <div class="flex items-center gap-4 pt-2">
+                <PrimaryButton :disabled="form.processing">
+                    <span v-if="form.processing">Memperbarui...</span>
+                    <span v-else>🔒 PERBARUI KATA SANDI</span>
+                </PrimaryButton>
 
                 <Transition
-                    enter-active-class="transition ease-in-out"
+                    enter-active-class="transition ease-in-out duration-200"
                     enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
+                    leave-active-class="transition ease-in-out duration-300"
                     leave-to-class="opacity-0"
                 >
-                    <p
+                    <span
                         v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold"
                     >
-                        Saved.
-                    </p>
+                        ✓ Kata sandi berhasil diperbarui.
+                    </span>
                 </Transition>
             </div>
         </form>

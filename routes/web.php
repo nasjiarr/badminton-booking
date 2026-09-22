@@ -63,4 +63,27 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::get('/reports/export/pdf', [\App\Http\Controllers\Admin\ReportController::class, 'exportPdf'])->name('reports.export.pdf');
     });
 
+// PWA Manifest & Service Worker root endpoints
+Route::get('/manifest.json', function () {
+    $manifestPath = public_path('build/manifest.webmanifest');
+    if (!file_exists($manifestPath)) {
+        return response()->json([], 404);
+    }
+    return response(file_get_contents($manifestPath), 200, ['Content-Type' => 'application/manifest+json']);
+});
+Route::get('/manifest.webmanifest', function () {
+    $manifestPath = public_path('build/manifest.webmanifest');
+    if (!file_exists($manifestPath)) {
+        return response()->json([], 404);
+    }
+    return response(file_get_contents($manifestPath), 200, ['Content-Type' => 'application/manifest+json']);
+});
+Route::get('/sw.js', function () {
+    $swPath = public_path('build/sw.js');
+    if (!file_exists($swPath)) {
+        return response('', 404);
+    }
+    return response(file_get_contents($swPath), 200, ['Content-Type' => 'application/javascript']);
+});
+
 require __DIR__.'/auth.php';

@@ -19,16 +19,27 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Confirm Password" />
+        <Head title="Konfirmasi Kata Sandi" />
 
-        <div class="mb-4 text-sm text-gray-600">
-            This is a secure area of the application. Please confirm your
-            password before continuing.
+        <!-- Header Info -->
+        <div class="mb-6">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-display font-black tracking-wider uppercase bg-courtOrange/10 text-courtOrange border border-courtOrange/30 -skew-x-6">
+                    <span class="transform skew-x-6">VERIFIKASI KEAMANAN</span>
+                </span>
+                <span class="text-xs text-slate-400 font-medium">Secure Checkpoint</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-display font-black tracking-tight text-white uppercase italic">
+                Konfirmasi Kata Sandi
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1 font-medium leading-relaxed">
+                Ini adalah area sensitif aplikasi. Harap masukkan kata sandi Anda saat ini sebelum melanjutkan.
+            </p>
         </div>
 
-        <form @submit.prevent="submit">
+        <form @submit.prevent="submit" class="space-y-5">
             <div>
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" value="Kata Sandi Anda" />
                 <TextInput
                     id="password"
                     type="password"
@@ -37,17 +48,19 @@ const submit = () => {
                     required
                     autocomplete="current-password"
                     autofocus
+                    placeholder="••••••••"
                 />
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4 flex justify-end">
+            <div class="pt-2">
                 <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
+                    class="w-full py-3 text-sm justify-center"
+                    :class="{ 'opacity-50 cursor-not-allowed': form.processing }"
                     :disabled="form.processing"
                 >
-                    Confirm
+                    <span v-if="form.processing">Memverifikasi...</span>
+                    <span v-else>🛡️ KONFIRMASI AKSES</span>
                 </PrimaryButton>
             </div>
         </form>
