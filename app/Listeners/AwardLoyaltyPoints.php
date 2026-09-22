@@ -44,14 +44,7 @@ class AwardLoyaltyPoints
             );
 
             $newTotalPoints = $membership->points + $pointsEarned;
-
-            // Tier calculation
-            $tier = 'bronze';
-            if ($newTotalPoints >= 250) {
-                $tier = 'gold';
-            } elseif ($newTotalPoints >= 100) {
-                $tier = 'silver';
-            }
+            $tier = Membership::calculateTier($newTotalPoints);
 
             $membership->update([
                 'points' => $newTotalPoints,

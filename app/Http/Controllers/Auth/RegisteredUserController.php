@@ -48,6 +48,11 @@ class RegisteredUserController extends Controller
             $user->assignRole('user');
         }
 
+        $user->membership()->firstOrCreate(
+            ['user_id' => $user->id],
+            ['points' => 0, 'tier' => 'bronze']
+        );
+
         event(new Registered($user));
 
         Auth::login($user);

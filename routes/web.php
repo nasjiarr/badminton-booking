@@ -37,6 +37,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-recurring-bookings', [\App\Http\Controllers\RecurringBookingController::class, 'index'])->name('recurring-bookings.index');
     Route::patch('/recurring-bookings/{recurringBooking}/cancel', [\App\Http\Controllers\RecurringBookingController::class, 'cancel'])->name('recurring-bookings.cancel');
 
+    // Membership & Loyalty Points routes
+    Route::get('/membership', [\App\Http\Controllers\MembershipController::class, 'index'])->name('membership.index');
+
     // Payment Simulation routes
     Route::get('/payments/{payment}', [\App\Http\Controllers\PaymentController::class, 'show'])->name('payments.show');
     Route::post('/payments/{payment}/pay', [\App\Http\Controllers\PaymentController::class, 'pay'])->name('payments.pay');
@@ -51,6 +54,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
         Route::resource('courts', CourtController::class);
     });
 

@@ -22,6 +22,7 @@ class UserSeeder extends Seeder
             ]
         );
         $user1->assignRole('user');
+        $user1->membership()->firstOrCreate(['user_id' => $user1->id], ['points' => 0, 'tier' => 'bronze']);
 
         $user2 = User::firstOrCreate(
             ['email' => 'user2@badminton.test'],
@@ -32,6 +33,7 @@ class UserSeeder extends Seeder
             ]
         );
         $user2->assignRole('user');
+        $user2->membership()->firstOrCreate(['user_id' => $user2->id], ['points' => 0, 'tier' => 'bronze']);
     }
 }
 

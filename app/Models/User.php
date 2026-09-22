@@ -50,6 +50,19 @@ class User extends Authenticatable
     }
 
     /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (User $user) {
+            $user->membership()->firstOrCreate(
+                ['user_id' => $user->id],
+                ['points' => 0, 'tier' => 'bronze']
+            );
+        });
+    }
+
+    /**
      * Get the bookings for this user.
      */
     public function bookings(): HasMany

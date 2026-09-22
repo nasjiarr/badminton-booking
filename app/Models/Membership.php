@@ -30,5 +30,35 @@ class Membership extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Determine tier based on total points.
+     * Bronze: 0-99, Silver: 100-299, Gold: 300+
+     */
+    public static function calculateTier(int $points): string
+    {
+        if ($points >= 300) {
+            return 'gold';
+        }
+
+        if ($points >= 100) {
+            return 'silver';
+        }
+
+        return 'bronze';
+    }
+
+    /**
+     * Get booking discount percentage based on tier.
+     * Bronze: 0%, Silver: 5%, Gold: 10%
+     */
+    public function getDiscountPercentageAttribute(): int
+    {
+        return match ($this->tier) {
+            'gold' => 10,
+            'silver' => 5,
+            default => 0,
+        };
+    }
 }
 

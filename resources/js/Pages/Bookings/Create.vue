@@ -12,6 +12,14 @@ const props = defineProps({
     initialDate: String,
     initialStartTime: String,
     initialEndTime: String,
+    userTier: {
+        type: String,
+        default: 'bronze',
+    },
+    discountPercentage: {
+        type: Number,
+        default: 0,
+    },
 });
 
 const page = usePage();
@@ -319,9 +327,18 @@ const totalHours = computed(() => {
     return sortedSelectedSlots.value.length;
 });
 
-const totalPrice = computed(() => {
+const rawTotalPrice = computed(() => {
     if (!selectedCourt.value || totalHours.value === 0) return 0;
     return totalHours.value * selectedCourt.value.price_per_hour;
+});
+
+const discountAmount = computed(() => {
+    if (!props.discountPercentage || props.discountPercentage <= 0) return 0;
+    return rawTotalPrice.value * (props.discountPercentage / 100);
+});
+
+const totalPrice = computed(() => {
+    return Math.max(0, rawTotalPrice.value - discountAmount.value);
 });
 
 // Booking form submission
@@ -763,9 +780,20 @@ const submitBooking = () => {
                                 </div>
                                 <div>
                                     <span class="text-xs text-gray-500 font-medium">Total Tarif:</span>
-                                    <p class="text-xl font-extrabold text-emerald-600 mt-0.5">
-                                        {{ formatPrice(totalPrice) }}
-                                    </p>
+                                    <div class="mt-0.5">
+                                        <div v-if="discountPercentage > 0" class="flex items-center gap-1.5 text-xs text-slate-500">
+                                            <span class="line-through">{{ formatPrice(rawTotalPrice) }}</span>
+                                            <span class="px-1.5 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-100 text-emerald-800">
+                                                -{{ discountPercentage }}% {{ userTier.toUpperCase() }}
+                                            </span>
+                                        </div>
+                                        <p class="text-xl font-extrabold text-emerald-600">
+                                            {{ formatPrice(totalPrice) }}
+                                        </p>
+                                        <span class="text-[10px] text-gray-400 font-medium">
+                                            +{{ Math.floor(totalPrice / 10000) }} Poin Loyalty
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 

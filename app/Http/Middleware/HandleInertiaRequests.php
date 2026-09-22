@@ -34,6 +34,15 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user() ? array_merge($request->user()->toArray(), [
                     'is_admin' => $request->user()->hasRole('admin'),
+                    'membership' => $request->user()->membership ? [
+                        'tier' => $request->user()->membership->tier,
+                        'points' => $request->user()->membership->points,
+                        'discount_percentage' => $request->user()->membership->discount_percentage,
+                    ] : [
+                        'tier' => 'bronze',
+                        'points' => 0,
+                        'discount_percentage' => 0,
+                    ],
                 ]) : null,
             ],
             'flash' => [

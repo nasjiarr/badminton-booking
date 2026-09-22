@@ -66,6 +66,12 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     🔁 Booking Rutin
                                 </NavLink>
+                                <NavLink
+                                    :href="route('membership.index')"
+                                    :active="route().current('membership.*')"
+                                >
+                                    ⭐ Membership
+                                </NavLink>
                             </div>
                         </div>
 
@@ -79,7 +85,24 @@ const showingNavigationDropdown = ref(false);
                                                 type="button"
                                                 class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
                                             >
-                                                {{ $page.props.auth.user.name }}
+                                                <span>{{ $page.props.auth.user.name }}</span>
+
+                                                <!-- Membership Tier Badge -->
+                                                <span
+                                                    v-if="$page.props.auth.user.membership"
+                                                    :class="[
+                                                        'ms-2 inline-flex items-center px-1.5 py-0.5 text-[10px] font-display font-black tracking-wider uppercase rounded -skew-x-6 border',
+                                                        $page.props.auth.user.membership.tier === 'gold'
+                                                            ? 'bg-amber-100 text-amber-900 border-amber-300'
+                                                            : $page.props.auth.user.membership.tier === 'silver'
+                                                            ? 'bg-slate-100 text-slate-700 border-slate-300'
+                                                            : 'bg-orange-50 text-orange-800 border-orange-200'
+                                                    ]"
+                                                >
+                                                    <span class="inline-block transform skew-x-6">
+                                                        {{ $page.props.auth.user.membership.tier }}
+                                                    </span>
+                                                </span>
 
                                                 <svg
                                                     class="-me-0.5 ms-2 h-4 w-4"
@@ -100,9 +123,14 @@ const showingNavigationDropdown = ref(false);
                                     <template #content>
                                         <DropdownLink
                                             v-if="$page.props.auth.user.is_admin"
-                                            :href="route('admin.courts.index')"
+                                            :href="route('admin.dashboard')"
                                         >
-                                            🏸 Admin Panel
+                                            🏸 Admin Dashboard
+                                        </DropdownLink>
+                                        <DropdownLink
+                                            :href="route('membership.index')"
+                                        >
+                                            ⭐ Membership Saya
                                         </DropdownLink>
                                         <DropdownLink
                                             :href="route('profile.edit')"
@@ -204,10 +232,16 @@ const showingNavigationDropdown = ref(false);
                             🔁 Booking Rutin
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
-                            v-if="$page.props.auth.user.is_admin"
-                            :href="route('admin.courts.index')"
+                            :href="route('membership.index')"
+                            :active="route().current('membership.*')"
                         >
-                            🏸 Admin Panel
+                            ⭐ Membership
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            v-if="$page.props.auth.user.is_admin"
+                            :href="route('admin.dashboard')"
+                        >
+                            🏸 Admin Dashboard
                         </ResponsiveNavLink>
                     </div>
 
@@ -216,10 +250,27 @@ const showingNavigationDropdown = ref(false);
                         class="border-t border-gray-200 pb-1 pt-4"
                     >
                         <div class="px-4">
-                            <div
-                                class="text-base font-medium text-gray-800"
-                            >
-                                {{ $page.props.auth.user.name }}
+                            <div class="flex items-center gap-2">
+                                <div
+                                    class="text-base font-medium text-gray-800"
+                                >
+                                    {{ $page.props.auth.user.name }}
+                                </div>
+                                <span
+                                    v-if="$page.props.auth.user.membership"
+                                    :class="[
+                                        'inline-flex items-center px-1.5 py-0.5 text-[10px] font-display font-black tracking-wider uppercase rounded -skew-x-6 border',
+                                        $page.props.auth.user.membership.tier === 'gold'
+                                            ? 'bg-amber-100 text-amber-900 border-amber-300'
+                                            : $page.props.auth.user.membership.tier === 'silver'
+                                            ? 'bg-slate-100 text-slate-700 border-slate-300'
+                                            : 'bg-orange-50 text-orange-800 border-orange-200'
+                                    ]"
+                                >
+                                    <span class="inline-block transform skew-x-6">
+                                        {{ $page.props.auth.user.membership.tier }}
+                                    </span>
+                                </span>
                             </div>
                             <div class="text-sm font-medium text-gray-500">
                                 {{ $page.props.auth.user.email }}
@@ -227,6 +278,9 @@ const showingNavigationDropdown = ref(false);
                         </div>
 
                         <div class="mt-3 space-y-1">
+                            <ResponsiveNavLink :href="route('membership.index')">
+                                ⭐ Membership Saya
+                            </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('profile.edit')">
                                 Profile
                             </ResponsiveNavLink>

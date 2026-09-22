@@ -40,12 +40,20 @@ class BookingController extends Controller
                 ];
             });
 
+        $user = $request->user();
+        $membership = $user?->membership()->firstOrCreate(
+            ['user_id' => $user->id],
+            ['points' => 0, 'tier' => 'bronze']
+        );
+
         return Inertia::render('Bookings/Create', [
             'courts' => $courts,
             'initialCourtId' => $request->query('court_id') ? (int) $request->query('court_id') : ($courts->first()['id'] ?? null),
             'initialDate' => $request->query('date', now()->format('Y-m-d')),
             'initialStartTime' => $request->query('start_time'),
             'initialEndTime' => $request->query('end_time'),
+            'userTier' => $membership ? $membership->tier : 'bronze',
+            'discountPercentage' => $membership ? $membership->discount_percentage : 0,
         ]);
     }
 
@@ -196,7 +204,15 @@ class BookingController extends Controller
                      ]);
                  }
 
-                 $sessionPrice = $hours * (float) $court->price_per_hour;
+                 // Calculate tier discount
+                 $membership = $user->membership()->firstOrCreate(
+                     ['user_id' => $user->id],
+                     ['points' => 0, 'tier' => 'bronze']
+                 );
+                 $discountPercent = $membership->discount_percentage;
+                 $rawSessionPrice = $hours * (float) $court->price_per_hour;
+                 $sessionDiscount = $rawSessionPrice * ($discountPercent / 100);
+                 $sessionPrice = round($rawSessionPrice - $sessionDiscount, 2);
 
                  // Evaluasi ketersediaan per minggu (anti-bentrok per sesi)
                  $successfulDates = [];
@@ -333,9 +349,17 @@ class BookingController extends Controller
                  ]);
              }
 
-             $totalPrice = $hours * (float) $court->price_per_hour;
+              // Calculate tier discount
+              $membership = $user->membership()->firstOrCreate(
+                  ['user_id' => $user->id],
+                  ['points' => 0, 'tier' => 'bronze']
+              );
+              $discountPercent = $membership->discount_percentage;
+              $rawTotal = $hours * (float) $court->price_per_hour;
+              $discountAmount = $rawTotal * ($discountPercent / 100);
+              $totalPrice = round($rawTotal - $discountAmount, 2);
 
-             $booking = Booking::create([
+              $booking = Booking::create([
                  'user_id' => $user->id,
                  'court_id' => $court->id,
                  'booking_date' => $bookingDate,
