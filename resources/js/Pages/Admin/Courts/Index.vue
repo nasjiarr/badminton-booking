@@ -1,6 +1,7 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Modal from '@/Components/Modal.vue';
+import EmptyState from '@/Components/EmptyState.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -154,13 +155,14 @@ const formatPrice = (price) => {
                                 </td>
                             </tr>
                             <tr v-if="courts.length === 0">
-                                <td colspan="5" class="px-6 py-12 text-center">
-                                    <p class="font-display font-extrabold text-lg text-courtSlate-700 uppercase tracking-tight">
-                                        Belum ada lapangan terdaftar
-                                    </p>
-                                    <p class="text-sm text-courtSlate-500 mt-1">
-                                        Klik "Tambah Lapangan" untuk mendaftarkan lapangan baru ke sistem.
-                                    </p>
+                                <td colspan="5" class="px-6 py-8">
+                                    <EmptyState
+                                        icon="🏸"
+                                        title="Belum Ada Lapangan Terdaftar"
+                                        description="Daftarkan gelanggang badminton baru untuk mulai menerima booking dari pelanggan."
+                                        actionLabel="+ Tambah Lapangan Baru"
+                                        :actionUrl="route('admin.courts.create')"
+                                    />
                                 </td>
                             </tr>
                         </tbody>

@@ -1,5 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import LoadingSkeleton from '@/Components/LoadingSkeleton.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
@@ -379,8 +380,13 @@ const formatDateIndonesian = (dateStr) => {
                     </div>
                 </div>
 
+                <!-- Loading Skeleton during search -->
+                <div v-if="isSearching" class="py-4">
+                    <LoadingSkeleton variant="card" :count="4" />
+                </div>
+
                 <!-- Available Courts Grid — consistent with booking page court card style -->
-                <div v-if="courts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div v-else-if="courts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                     <div
                         v-for="court in courts"
                         :key="court.id"

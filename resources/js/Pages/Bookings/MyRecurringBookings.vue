@@ -3,6 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import Modal from '@/Components/Modal.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
+import EmptyState from '@/Components/EmptyState.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
@@ -366,25 +367,14 @@ const getSessionBadge = (session) => {
                 </div>
 
                 <!-- Empty State -->
-                <div v-else class="text-center py-16 rounded-2xl border-2 border-dashed border-courtSlate-300 bg-courtSlate-50 p-8">
-                    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-courtSlate-200 flex items-center justify-center text-courtSlate-400 text-3xl">
-                        🔁
-                    </div>
-                    <h3 class="text-lg font-display font-black uppercase tracking-tight text-courtSlate-900">
-                        Belum Ada Booking Rutin
-                    </h3>
-                    <p class="text-xs sm:text-sm text-courtSlate-500 max-w-md mx-auto mt-1 mb-6">
-                        Anda belum memiliki rangkaian jadwal booking rutin mingguan. Pilih slot lapangan dan aktifkan opsi "Jadikan Booking Rutin" saat memesan.
-                    </p>
-                    <Link
-                        :href="route('bookings.create')"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-arena-base text-volt font-display font-black text-xs uppercase tracking-wider shadow-sm hover:bg-arena-surface hover:shadow-volt-glow-sm transition-all -skew-x-3 cursor-pointer"
-                    >
-                        <span class="inline-flex items-center gap-2 skew-x-3">
-                            <span>🏸 Buat Booking Sekarang</span>
-                        </span>
-                    </Link>
-                </div>
+                <EmptyState
+                    v-else
+                    icon="🔁"
+                    title="Belum Ada Booking Rutin"
+                    description="Anda belum memiliki rangkaian jadwal booking rutin mingguan. Pilih slot lapangan dan aktifkan opsi Jadikan Booking Rutin saat memesan."
+                    actionLabel="🏸 Buat Booking Sekarang"
+                    :actionUrl="route('bookings.create')"
+                />
 
             </div>
         </div>

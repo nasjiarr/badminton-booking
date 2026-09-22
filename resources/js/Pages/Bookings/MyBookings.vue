@@ -1,9 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import Toast from '@/Components/Toast.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import Modal from '@/Components/Modal.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
+import EmptyState from '@/Components/EmptyState.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -18,7 +18,7 @@ const cancelling = ref(false);
 
 const filterTabs = [
     { label: 'Semua', value: 'all' },
-    { label: 'Menunggu Pembayaran', value: 'pending' },
+    { label: 'Menunggu Bayar', value: 'pending' },
     { label: 'Dikonfirmasi', value: 'confirmed' },
     { label: 'Selesai', value: 'completed' },
     { label: 'Dibatalkan', value: 'cancelled' },
@@ -67,33 +67,33 @@ const formatPrice = (price) => {
     }).format(price);
 };
 
-const getStatusBadgeClass = (status) => {
+const getStatusBadge = (status) => {
     switch (status) {
         case 'pending':
-            return 'bg-amber-100 text-amber-800 border border-amber-200';
+            return {
+                label: 'Menunggu Pembayaran',
+                class: 'bg-amber-100 text-amber-800 border-amber-300',
+            };
         case 'confirmed':
-            return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+            return {
+                label: 'Dikonfirmasi',
+                class: 'bg-volt/20 text-volt-deep border-volt/40',
+            };
         case 'completed':
-            return 'bg-blue-100 text-blue-800 border border-blue-200';
+            return {
+                label: 'Selesai',
+                class: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+            };
         case 'cancelled':
-            return 'bg-rose-100 text-rose-800 border border-rose-200';
+            return {
+                label: 'Dibatalkan',
+                class: 'bg-courtOrange/10 text-courtOrange border-courtOrange/30',
+            };
         default:
-            return 'bg-gray-100 text-gray-800 border border-gray-200';
-    }
-};
-
-const getStatusLabel = (status) => {
-    switch (status) {
-        case 'pending':
-            return 'Menunggu Pembayaran';
-        case 'confirmed':
-            return 'Dikonfirmasi';
-        case 'completed':
-            return 'Selesai';
-        case 'cancelled':
-            return 'Dibatalkan';
-        default:
-            return status;
+            return {
+                label: status,
+                class: 'bg-courtSlate-100 text-courtSlate-700 border-courtSlate-200',
+            };
     }
 };
 </script>
@@ -102,25 +102,29 @@ const getStatusLabel = (status) => {
     <Head title="Booking Saya" />
 
     <AuthenticatedLayout>
-        <Toast />
         <template #header>
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                        Riwayat Booking Saya
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="court-badge-volt text-[10px] py-0.5"><span>Pemesanan Saya</span></span>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-display font-black tracking-tight text-courtSlate-900 uppercase">
+                        Riwayat Booking Lapangan
                     </h2>
-                    <p class="text-sm text-gray-500 mt-0.5">
+                    <p class="text-xs sm:text-sm text-courtSlate-600 mt-0.5">
                         Kelola dan pantau seluruh jadwal pemesanan lapangan Anda.
                     </p>
                 </div>
+
                 <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg border border-gray-200">
-                        <span class="px-3 py-1.5 rounded-md text-xs font-bold bg-white text-gray-900 shadow-sm">
+                    <!-- Navigation switcher -->
+                    <div class="flex items-center gap-1 bg-courtSlate-100 p-1 rounded-xl border border-courtSlate-200">
+                        <span class="px-3 py-1.5 rounded-lg text-xs font-display font-black uppercase tracking-wider bg-arena-base text-volt shadow-xs">
                             Booking Satuan
                         </span>
                         <Link
                             :href="route('recurring-bookings.index')"
-                            class="px-3 py-1.5 rounded-md text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-white/50 transition"
+                            class="px-3 py-1.5 rounded-lg text-xs font-display font-bold uppercase tracking-wider text-courtSlate-600 hover:text-courtSlate-900 hover:bg-white/50 transition"
                         >
                             🔁 Booking Rutin
                         </Link>
@@ -128,12 +132,14 @@ const getStatusLabel = (status) => {
 
                     <Link
                         :href="route('bookings.create')"
-                        class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
+                        class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-volt text-volt-contrast font-display font-black text-xs uppercase tracking-wider shadow-volt-glow-sm hover:bg-volt-hover transition active:scale-[0.98] -skew-x-3 cursor-pointer"
                     >
-                        <svg class="-ml-0.5 mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Booking Baru
+                        <span class="inline-flex items-center gap-1 skew-x-3">
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span>Booking Baru</span>
+                        </span>
                     </Link>
                 </div>
             </div>
@@ -142,17 +148,17 @@ const getStatusLabel = (status) => {
         <div class="py-8">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
                 <!-- Filter Tabs -->
-                <div class="flex flex-wrap gap-2 pb-2 border-b border-gray-200">
+                <div class="flex items-center gap-2 border-b-2 border-courtSlate-200 pb-3 overflow-x-auto">
                     <button
                         v-for="tab in filterTabs"
                         :key="tab.value"
                         type="button"
                         @click="applyFilter(tab.value)"
+                        class="px-4 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider transition whitespace-nowrap"
                         :class="[
                             currentFilter === tab.value
-                                ? 'bg-indigo-600 text-white shadow-sm font-semibold'
-                                : 'bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-gray-200',
-                            'px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition',
+                                ? 'bg-arena-base text-volt shadow-xs'
+                                : 'bg-white text-courtSlate-600 hover:text-courtSlate-900 border border-courtSlate-200',
                         ]"
                     >
                         {{ tab.label }}
@@ -164,68 +170,62 @@ const getStatusLabel = (status) => {
                     <div
                         v-for="booking in bookings.data"
                         :key="booking.id"
-                        class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6 transition hover:shadow-md flex flex-col md:flex-row md:items-center justify-between gap-5"
+                        class="bg-white rounded-2xl border-2 border-courtSlate-200 p-5 sm:p-6 shadow-xs hover:shadow-card-elevated hover:border-courtSlate-300 transition-all flex flex-col md:flex-row md:items-center justify-between gap-5"
                     >
                         <!-- Left info -->
                         <div class="flex items-start gap-4">
                             <!-- Court image/thumb -->
-                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-arena-card border border-arena-border flex-shrink-0 flex items-center justify-center">
                                 <img
                                     v-if="booking.court_image"
                                     :src="booking.court_image"
                                     :alt="booking.court_name"
                                     class="w-full h-full object-cover"
                                 />
-                                <div v-else class="text-gray-400">
-                                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
+                                <div v-else class="text-courtSlate-400 text-2xl">
+                                    🏸
                                 </div>
                             </div>
 
                             <!-- Details -->
                             <div>
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <h3 class="text-base sm:text-lg font-bold text-gray-900">
+                                <div class="flex items-center gap-2.5 flex-wrap">
+                                    <h3 class="font-display font-black text-lg sm:text-xl text-courtSlate-900 uppercase tracking-tight">
                                         {{ booking.court_name }}
                                     </h3>
                                     <span
-                                        :class="getStatusBadgeClass(booking.status)"
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                                        :class="getStatusBadge(booking.status).class"
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-display font-black uppercase tracking-wider border -skew-x-6"
                                     >
-                                        {{ getStatusLabel(booking.status) }}
+                                        <span class="skew-x-6">{{ getStatusBadge(booking.status).label }}</span>
                                     </span>
                                 </div>
 
-                                <div class="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-600">
-                                    <div class="flex items-center gap-1">
-                                        <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
+                                <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-courtSlate-600 font-medium">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-courtSlate-400">📅</span>
                                         <span>{{ booking.booking_date_formatted }}</span>
                                     </div>
-                                    <div class="flex items-center gap-1 font-semibold text-indigo-700">
-                                        <svg class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span>{{ booking.start_time }} - {{ booking.end_time }}</span>
+                                    <div class="flex items-center gap-1.5 font-display font-extrabold text-courtSlate-900 text-sm">
+                                        <span class="text-courtSlate-400 font-normal">⏰</span>
+                                        <span>{{ booking.start_time }} - {{ booking.end_time }} WIB</span>
                                     </div>
-                                    <div class="text-gray-400 text-xs">
-                                        Kode Booking: #{{ booking.id }}
+                                    <div class="text-[11px] text-courtSlate-400 font-mono">
+                                        #{{ booking.id }}
                                     </div>
                                 </div>
 
-                                <p v-if="booking.notes" class="text-xs text-gray-500 mt-2 bg-gray-50 px-2.5 py-1.5 rounded-md border border-gray-100">
-                                    Catatan: {{ booking.notes }}
+                                <p v-if="booking.notes" class="text-xs text-courtSlate-600 mt-2 bg-courtSlate-50 px-3 py-1.5 rounded-lg border border-courtSlate-100 max-w-lg">
+                                    <span class="font-bold text-courtSlate-700">Catatan:</span> {{ booking.notes }}
                                 </p>
                             </div>
                         </div>
 
                         <!-- Right pricing & actions -->
-                        <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 pt-4 sm:pt-0 border-t sm:border-t-0 border-gray-100">
-                            <div>
-                                <span class="text-xs text-gray-500 sm:text-right block">Total Tagihan:</span>
-                                <span class="text-lg font-extrabold text-emerald-600">
+                        <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 pt-4 sm:pt-0 border-t sm:border-t-0 border-courtSlate-100">
+                            <div class="sm:text-right">
+                                <span class="text-[10px] font-display font-black uppercase tracking-widest text-courtSlate-400 block">Total Tagihan:</span>
+                                <span class="athletic-number text-xl sm:text-2xl font-black text-courtSlate-900 tracking-tight">
                                     {{ formatPrice(booking.total_price) }}
                                 </span>
                             </div>
@@ -235,24 +235,26 @@ const getStatusLabel = (status) => {
                                 <Link
                                     v-if="booking.status === 'pending' && booking.payment"
                                     :href="route('payments.show', booking.payment.id)"
-                                    class="inline-flex items-center gap-1.5 rounded-lg bg-volt px-3.5 py-1.5 font-display font-black text-xs uppercase tracking-wider text-volt-contrast shadow-sm hover:bg-volt-hover hover:shadow-volt-glow-sm transition active:scale-[0.98]"
+                                    class="inline-flex items-center gap-1.5 rounded-xl bg-volt px-3.5 py-2 font-display font-black text-xs uppercase tracking-wider text-volt-contrast shadow-volt-glow-sm hover:bg-volt-hover transition active:scale-[0.98] -skew-x-3 cursor-pointer"
                                 >
-                                    <span>Bayar Sekarang</span>
-                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                    </svg>
+                                    <span class="inline-flex items-center gap-1.5 skew-x-3">
+                                        <span>Bayar Sekarang</span>
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        </svg>
+                                    </span>
                                 </Link>
 
                                 <!-- View invoice for paid bookings -->
                                 <Link
                                     v-if="booking.payment && booking.payment.status === 'paid'"
                                     :href="route('payments.invoice', booking.payment.id)"
-                                    class="inline-flex items-center gap-1.5 rounded-lg border-2 border-courtSlate-200 bg-white px-3.5 py-1.5 font-display font-extrabold text-xs uppercase tracking-wider text-courtSlate-800 hover:bg-courtSlate-100 transition shadow-xs"
+                                    class="inline-flex items-center gap-1.5 rounded-xl border-2 border-courtSlate-200 bg-white px-3.5 py-2 font-display font-extrabold text-xs uppercase tracking-wider text-courtSlate-800 hover:bg-courtSlate-100 transition shadow-xs"
                                 >
                                     <svg class="h-3.5 w-3.5 text-courtSlate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    <span>Lihat Invoice</span>
+                                    <span>Invoice</span>
                                 </Link>
 
                                 <!-- Cancel button if eligible under policy -->
@@ -260,9 +262,9 @@ const getStatusLabel = (status) => {
                                     v-if="booking.can_cancel"
                                     type="button"
                                     @click="openCancelModal(booking)"
-                                    class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition"
+                                    class="inline-flex items-center px-3 py-2 text-xs font-display font-bold uppercase tracking-wider text-courtOrange bg-courtOrange-light hover:bg-courtOrange/20 border border-courtOrange/30 rounded-xl transition"
                                 >
-                                    Batalkan Booking
+                                    Batalkan
                                 </button>
                             </div>
                         </div>
@@ -278,71 +280,60 @@ const getStatusLabel = (status) => {
                                     v-html="link.label"
                                     :class="[
                                         link.active
-                                            ? 'bg-indigo-600 text-white font-bold'
-                                            : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300',
-                                        'px-3.5 py-1.5 text-xs rounded-md transition',
+                                            ? 'bg-arena-base text-volt font-bold'
+                                            : 'bg-white text-courtSlate-700 hover:bg-courtSlate-100 border border-courtSlate-200',
+                                        'px-3.5 py-1.5 text-xs rounded-lg font-display font-bold transition',
                                     ]"
                                 />
                                 <span
                                     v-else
                                     v-html="link.label"
-                                    class="px-3.5 py-1.5 text-xs text-gray-400 bg-gray-50 border border-gray-200 rounded-md cursor-not-allowed"
+                                    class="px-3.5 py-1.5 text-xs text-courtSlate-400 bg-courtSlate-50 border border-courtSlate-200 rounded-lg cursor-not-allowed font-display font-bold"
                                 />
                             </template>
                         </div>
                     </div>
                 </div>
 
-                <!-- Empty State -->
-                <div v-else class="bg-white rounded-xl border border-gray-200 p-12 text-center">
-                    <svg class="mx-auto h-16 w-16 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <h3 class="text-base font-bold text-gray-800">
-                        Tidak ada riwayat booking
-                    </h3>
-                    <p class="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
-                        Anda belum memiliki jadwal booking dengan status ini. Silakan buat booking baru untuk memesan lapangan badminton.
-                    </p>
-                    <div class="mt-6">
-                        <Link
-                            :href="route('bookings.create')"
-                            class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 shadow-sm transition"
-                        >
-                            Booking Lapangan Sekarang
-                        </Link>
-                    </div>
-                </div>
+                <!-- Reusable Empty State -->
+                <EmptyState
+                    v-else
+                    icon="🏸"
+                    title="Tidak Ada Riwayat Booking"
+                    description="Anda belum memiliki jadwal pemesanan lapangan pada filter status ini. Silakan buat booking baru untuk memesan lapangan badminton."
+                    actionLabel="🏸 Booking Lapangan Sekarang"
+                    :actionUrl="route('bookings.create')"
+                />
             </div>
         </div>
 
         <!-- Cancellation Confirmation Modal -->
         <Modal :show="confirmingCancellation" @close="closeCancelModal">
-            <div class="p-6">
-                <div class="flex items-center gap-3 text-rose-600 mb-2">
-                    <div class="p-2 rounded-full bg-rose-100">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <div class="p-6 bg-white rounded-2xl">
+                <div class="flex items-center gap-3 text-courtOrange mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-courtOrange/10 border-2 border-courtOrange/20 flex items-center justify-center shrink-0">
+                        <svg class="h-5 w-5 text-courtOrange" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                     </div>
-                    <h2 class="text-lg font-bold text-gray-900">
-                        Konfirmasi Pembatalan
+                    <h2 class="font-display font-black text-xl uppercase tracking-tight text-courtSlate-900">
+                        Konfirmasi Pembatalan Booking
                     </h2>
                 </div>
 
-                <p class="text-sm text-gray-600 mt-2">
-                    Apakah Anda yakin ingin membatalkan booking <strong>#{{ bookingToCancel?.id }}</strong> di <strong>{{ bookingToCancel?.court_name }}</strong> pada tanggal <strong>{{ bookingToCancel?.booking_date_formatted }} ({{ bookingToCancel?.start_time }} - {{ bookingToCancel?.end_time }})</strong>?
+                <p class="text-sm text-courtSlate-600 mt-2 leading-relaxed">
+                    Apakah Anda yakin ingin membatalkan booking <strong class="text-courtSlate-900">#{{ bookingToCancel?.id }}</strong> di <strong class="text-courtSlate-900">{{ bookingToCancel?.court_name }}</strong> pada tanggal <strong class="text-courtSlate-900">{{ bookingToCancel?.booking_date_formatted }} ({{ bookingToCancel?.start_time }} - {{ bookingToCancel?.end_time }})</strong>?
                 </p>
 
-                <p class="text-xs text-gray-500 mt-2 bg-gray-50 p-2.5 rounded border border-gray-200">
-                    Slot jam ini akan segera dibuka kembali untuk pelanggan lain.
-                </p>
+                <div class="mt-4 p-3.5 rounded-xl bg-courtOrange-light border border-courtOrange/20 text-xs text-courtOrange leading-relaxed">
+                    ⚠️ <strong>Perhatian:</strong> Slot jam ini akan segera dibuka kembali untuk dapat dipesan oleh pelanggan lain.
+                </div>
 
                 <div class="mt-6 flex justify-end gap-3">
-                    <SecondaryButton @click="closeCancelModal">
-                        Batal
+                    <SecondaryButton @click="closeCancelModal" class="rounded-xl border-2 border-courtSlate-200 text-courtSlate-700 hover:bg-courtSlate-100">
+                        Kembali
                     </SecondaryButton>
-                    <DangerButton :disabled="cancelling" @click="submitCancel">
+                    <DangerButton :disabled="cancelling" @click="submitCancel" class="rounded-xl bg-courtOrange hover:bg-courtOrange-hover text-white">
                         <span v-if="cancelling">Membatalkan...</span>
                         <span v-else>Ya, Batalkan Booking</span>
                     </DangerButton>
@@ -351,4 +342,3 @@ const getStatusLabel = (status) => {
         </Modal>
     </AuthenticatedLayout>
 </template>
-

@@ -1,5 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import EmptyState from '@/Components/EmptyState.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -413,26 +414,14 @@ const tierV = getTierVisuals(props.membership.tier);
                     </div>
 
                     <!-- Empty State -->
-                    <div v-else class="p-12 text-center">
-                        <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-courtSlate-100 border border-courtSlate-200 flex items-center justify-center text-2xl text-courtSlate-400">
-                            ⭐
-                        </div>
-                        <h4 class="font-display font-black text-lg text-courtSlate-900 uppercase">
-                            Belum Ada Riwayat Poin
-                        </h4>
-                        <p class="mt-1 text-sm text-courtSlate-500 max-w-md mx-auto">
-                            Lakukan booking lapangan pertama Anda dan selesaikan pembayaran untuk mulai mengumpulkan poin loyalty!
-                        </p>
-                        <div class="mt-6">
-                            <Link
-                                :href="route('bookings.create')"
-                                class="inline-flex items-center gap-2 px-5 py-2.5 bg-arena-base text-volt font-display font-black text-xs uppercase tracking-wider rounded-xl shadow-sm hover:bg-arena-surface hover:shadow-volt-glow-sm transition-all -skew-x-3 cursor-pointer"
-                            >
-                                <span class="inline-block transform skew-x-3">
-                                    Mulai Booking Sekarang
-                                </span>
-                            </Link>
-                        </div>
+                    <div v-else class="p-8">
+                        <EmptyState
+                            icon="⭐"
+                            title="Belum Ada Riwayat Poin"
+                            description="Lakukan booking lapangan pertama Anda dan selesaikan pembayaran untuk mulai mengumpulkan poin loyalty!"
+                            actionLabel="🏸 Mulai Booking Sekarang"
+                            :actionUrl="route('bookings.create')"
+                        />
                     </div>
                 </div>
 
