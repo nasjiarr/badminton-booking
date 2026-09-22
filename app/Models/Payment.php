@@ -34,5 +34,45 @@ class Payment extends Model
     {
         return $this->belongsTo(Booking::class);
     }
+
+    /**
+     * Generate a unique sequential invoice number (e.g., INV-20260922-0001).
+     */
+    public static function generateInvoiceNumber(): string
+    {
+        $datePrefix = 'INV-' . now()->format('Ymd') . '-';
+        $lastPayment = self::where('invoice_number', 'like', $datePrefix . '%')
+            ->orderByDesc('id')
+            ->first();
+
+        if ($lastPayment) {
+            $lastSeq = (int) substr($lastPayment->invoice_number, -4);
+            $nextSeq = $lastSeq + 1;
+        } else {
+            $nextSeq = 1;
+        }
+
+        return $datePrefix . sprintf('%04d', $nextSeq);
+    }
+
+    public function isPaid(): bool
+    {
+        return $this->status === 'paid';
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isFailed(): bool
+    {
+        return $this->status === 'failed';
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->status === 'expired';
+    }
 }
 

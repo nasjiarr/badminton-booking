@@ -10,6 +10,8 @@ const props = defineProps({
     courts: Array,
     initialCourtId: Number,
     initialDate: String,
+    initialStartTime: String,
+    initialEndTime: String,
 });
 
 const page = usePage();
@@ -173,6 +175,18 @@ const fetchAvailability = async () => {
         if (response.ok) {
             const data = await response.json();
             slots.value = data.slots || [];
+
+            // Auto-select slots from search prefill if provided
+            if (props.initialStartTime && props.initialEndTime && selectedSlotTimes.value.length === 0) {
+                const prefilled = slots.value
+                    .filter((s) => s.start_time >= props.initialStartTime && s.end_time <= props.initialEndTime && s.status === 'available')
+                    .map((s) => s.start_time);
+
+                if (prefilled.length > 0) {
+                    selectedSlotTimes.value = prefilled;
+                    showRealtimeAlert(`⚡ Slot ${props.initialStartTime} - ${props.initialEndTime} otomatis dipilih dari hasil pencarian.`);
+                }
+            }
         } else {
             slots.value = [];
         }
@@ -371,49 +385,63 @@ const submitBooking = () => {
                             @click="selectedCourtId = court.id"
                             :class="[
                                 selectedCourtId === court.id
-                                    ? 'border-indigo-600 ring-2 ring-indigo-600 shadow-md bg-indigo-50/20'
-                                    : 'border-gray-200 hover:border-gray-300 hover:shadow-sm bg-white',
-                                'relative flex flex-col rounded-xl border-2 p-4 cursor-pointer transition-all duration-150',
+                                    ? 'border-volt ring-2 ring-volt/60 shadow-volt-glow bg-gradient-to-b from-volt/10 via-white to-white court-stripe-accent -translate-y-1'
+                                    : 'border-courtSlate-200 hover:border-courtSlate-400 hover:shadow-card-elevated hover:-translate-y-0.5 bg-white',
+                                'relative flex flex-col rounded-xl border-2 p-4 cursor-pointer transition-all duration-200',
                             ]"
                         >
-                            <!-- Image or placeholder -->
-                            <div class="h-36 w-full rounded-lg overflow-hidden bg-gray-100 mb-3 flex items-center justify-center">
+                            <!-- Image or placeholder with athletic badge -->
+                            <div class="relative h-36 w-full rounded-lg overflow-hidden bg-arena-card mb-3.5 flex items-center justify-center">
                                 <img
                                     v-if="court.image_url"
                                     :src="court.image_url"
                                     :alt="court.name"
                                     class="w-full h-full object-cover"
                                 />
-                                <div v-else class="flex flex-col items-center justify-center text-gray-400">
+                                <div v-else class="flex flex-col items-center justify-center text-courtSlate-400">
                                     <svg class="h-10 w-10 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                     </svg>
-                                    <span class="text-xs">Foto Lapangan</span>
+                                    <span class="text-xs font-display font-bold uppercase tracking-wider">Foto Lapangan</span>
+                                </div>
+
+                                <!-- Floating Status Badge -->
+                                <div class="absolute top-2.5 left-2.5">
+                                    <span
+                                        v-if="selectedCourtId === court.id"
+                                        class="court-badge-volt text-xs shadow-sm"
+                                    >
+                                        <span>LAPANGAN TERPILIH</span>
+                                    </span>
+                                    <span
+                                        v-else
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold font-display tracking-wider uppercase bg-arena-base/80 backdrop-blur-xs text-courtSlate-200"
+                                    >
+                                        STANDAR PBSI
+                                    </span>
                                 </div>
                             </div>
 
-                            <!-- Name & Price -->
+                            <!-- Name & Description -->
                             <div class="flex items-start justify-between gap-2">
-                                <h4 class="font-bold text-gray-900 text-base">
+                                <h4 class="font-display font-black text-2xl tracking-tight text-courtSlate-900 uppercase">
                                     {{ court.name }}
                                 </h4>
-                                <span
-                                    v-if="selectedCourtId === court.id"
-                                    class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700"
-                                >
-                                    Dipilih
-                                </span>
                             </div>
 
-                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">
+                            <p class="text-xs text-courtSlate-600 font-sans font-medium line-clamp-2 mt-1 leading-relaxed">
                                 {{ court.description }}
                             </p>
 
-                            <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                                <span class="text-xs text-gray-500">Tarif Sewa:</span>
-                                <span class="text-sm font-bold text-indigo-600">
-                                    {{ formatPrice(court.price_per_hour) }}<span class="text-xs font-normal text-gray-500">/jam</span>
-                                </span>
+                            <!-- Price footer with athletic tabular numbers -->
+                            <div class="mt-4 pt-3 border-t border-courtSlate-100 flex items-baseline justify-between">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-courtSlate-400">Tarif Sewa</span>
+                                <div class="flex items-baseline">
+                                    <span class="athletic-number text-2xl font-black text-courtSlate-900 tracking-tight">
+                                        {{ formatPrice(court.price_per_hour) }}
+                                    </span>
+                                    <span class="text-xs font-bold text-courtSlate-400 font-sans ml-1">/jam</span>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -43,37 +43,37 @@ watch(
     >
         <div
             v-if="show"
-            class="fixed right-4 top-4 z-[100] max-w-sm rounded-lg p-4 shadow-lg"
+            class="fixed right-4 top-4 z-[100] max-w-sm rounded-xl p-4 shadow-xl border-2"
             :class="{
-                'bg-green-50 text-green-800 border border-green-200': type === 'success',
-                'bg-red-50 text-red-800 border border-red-200': type === 'error',
+                'bg-arena-base text-white border-volt shadow-volt-glow-sm': type === 'success',
+                'bg-arena-base text-white border-courtOrange shadow-orange-glow': type === 'error',
             }"
         >
             <div class="flex items-center">
                 <!-- Success icon -->
                 <svg
                     v-if="type === 'success'"
-                    class="mr-2 h-5 w-5 text-green-400"
+                    class="mr-2.5 h-5 w-5 text-volt flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                 >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <!-- Error icon -->
                 <svg
                     v-if="type === 'error'"
-                    class="mr-2 h-5 w-5 text-red-400"
+                    class="mr-2.5 h-5 w-5 text-courtOrange flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                 >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p class="text-sm font-medium">{{ message }}</p>
+                <p class="text-sm font-semibold text-white tracking-wide">{{ message }}</p>
                 <button
                     @click="show = false"
-                    class="ml-4 inline-flex text-gray-400 hover:text-gray-600 focus:outline-none"
+                    class="ml-4 inline-flex text-courtSlate-400 hover:text-white transition focus:outline-none"
                 >
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

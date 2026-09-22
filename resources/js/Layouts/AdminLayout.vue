@@ -53,49 +53,51 @@ const navigation = [
         <!-- Mobile sidebar overlay -->
         <div
             v-if="sidebarOpen"
-            class="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
+            class="fixed inset-0 z-40 bg-arena-base/80 backdrop-blur-xs lg:hidden"
             @click="sidebarOpen = false"
         />
 
         <!-- Mobile sidebar -->
         <div
             v-if="sidebarOpen"
-            class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-gray-900 lg:hidden"
+            class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-arena-base border-r border-arena-border lg:hidden"
         >
-            <div class="flex h-16 items-center justify-between px-4">
-                <span class="text-lg font-bold text-white">🏸 Admin Panel</span>
-                <button @click="sidebarOpen = false" class="text-gray-400 hover:text-white">
+            <div class="flex h-16 items-center justify-between px-5 border-b border-arena-border bg-arena-card/50">
+                <span class="text-xl font-display font-black tracking-wider text-white uppercase flex items-center gap-2">
+                    🏸 SMASH <span class="text-volt">ADMIN</span>
+                </span>
+                <button @click="sidebarOpen = false" class="text-courtSlate-400 hover:text-white">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
-            <nav class="flex-1 space-y-1 px-2 py-4">
+            <nav class="flex-1 space-y-1.5 px-3 py-4">
                 <template v-for="item in navigation" :key="item.name">
                     <Link
                         v-if="!item.disabled"
                         :href="item.href"
                         :class="[
                             item.active
-                                ? 'bg-gray-800 text-white'
-                                : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                            'group flex items-center rounded-md px-3 py-2 text-sm font-medium',
+                                ? 'bg-arena-surface text-volt border-l-4 border-volt font-bold shadow-xs'
+                                : 'text-courtSlate-300 hover:bg-arena-card hover:text-white',
+                            'group flex items-center rounded-r-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
                         ]"
                     >
-                        <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" :d="item.icon" />
                         </svg>
                         {{ item.name }}
                     </Link>
                     <span
                         v-else
-                        class="group flex cursor-not-allowed items-center rounded-md px-3 py-2 text-sm font-medium text-gray-500"
+                        class="group flex cursor-not-allowed items-center rounded-r-lg px-3 py-2.5 text-sm font-medium text-courtSlate-500 opacity-60"
                     >
-                        <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" :d="item.icon" />
                         </svg>
                         {{ item.name }}
-                        <span class="ml-auto text-xs text-gray-600">Segera</span>
+                        <span class="ml-auto text-[10px] font-display font-bold uppercase tracking-wider bg-arena-card px-1.5 py-0.5 rounded text-courtSlate-400">Segera</span>
                     </span>
                 </template>
             </nav>
@@ -103,36 +105,39 @@ const navigation = [
 
         <!-- Desktop sidebar -->
         <div class="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-            <div class="flex min-h-0 flex-1 flex-col bg-gray-900">
-                <div class="flex h-16 items-center px-4">
-                    <span class="text-lg font-bold text-white">🏸 Admin Panel</span>
+            <div class="flex min-h-0 flex-1 flex-col bg-arena-base border-r border-arena-border">
+                <div class="flex h-16 items-center px-5 border-b border-arena-border bg-arena-card/40">
+                    <span class="text-xl font-display font-black tracking-wider text-white uppercase flex items-center gap-1.5">
+                        🏸 SMASH <span class="text-volt">ARENA</span>
+                        <span class="ml-1 text-[10px] font-display font-black tracking-widest uppercase bg-volt text-volt-contrast px-1.5 py-0.2 rounded">ADMIN</span>
+                    </span>
                 </div>
-                <nav class="flex-1 space-y-1 px-2 py-4">
+                <nav class="flex-1 space-y-1.5 px-3 py-5">
                     <template v-for="item in navigation" :key="item.name">
                         <Link
                             v-if="!item.disabled"
                             :href="item.href"
                             :class="[
                                 item.active
-                                    ? 'bg-gray-800 text-white'
-                                    : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                                'group flex items-center rounded-md px-3 py-2 text-sm font-medium',
+                                    ? 'bg-arena-surface text-volt border-l-4 border-volt font-bold shadow-xs'
+                                    : 'text-courtSlate-300 hover:bg-arena-card hover:text-white',
+                                'group flex items-center rounded-r-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
                             ]"
                         >
-                            <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" :d="item.icon" />
                             </svg>
                             {{ item.name }}
                         </Link>
                         <span
                             v-else
-                            class="group flex cursor-not-allowed items-center rounded-md px-3 py-2 text-sm font-medium text-gray-500"
+                            class="group flex cursor-not-allowed items-center rounded-r-lg px-3 py-2.5 text-sm font-medium text-courtSlate-500 opacity-60"
                         >
-                            <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" :d="item.icon" />
                             </svg>
                             {{ item.name }}
-                            <span class="ml-auto text-xs text-gray-600">Segera</span>
+                            <span class="ml-auto text-[10px] font-display font-bold uppercase tracking-wider bg-arena-card px-1.5 py-0.5 rounded text-courtSlate-400">Segera</span>
                         </span>
                     </template>
                 </nav>
@@ -178,14 +183,14 @@ const navigation = [
             </div>
 
             <!-- Page heading -->
-            <header v-if="$slots.header" class="bg-white shadow">
-                <div class="px-4 py-6 sm:px-6 lg:px-8">
+            <header v-if="$slots.header" class="bg-white border-b border-courtSlate-200">
+                <div class="px-4 py-5 sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>
             </header>
 
             <!-- Page content -->
-            <main class="flex-1">
+            <main class="flex-1 bg-courtSlate-100 min-h-[calc(100vh-8rem)]">
                 <slot />
             </main>
         </div>

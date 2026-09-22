@@ -1,0 +1,122 @@
+/**
+ * SMASH ARENA — Badminton Booking Design Tokens
+ * Direction: BOLD & ENERGETIC (Sporty, Dynamic, Arena High-Contrast)
+ */
+
+:root {
+    /* 1. Base Arena Palette */
+    --color-arena-base: #0A0F1D;         /* Deep indoor arena navy/charcoal */
+    --color-arena-card: #111A2E;         /* Dark container surface */
+    --color-arena-surface: #18233C;      /* Secondary dark surface */
+    --color-arena-border: #24324F;       /* Structural border on dark */
+    --color-arena-light: #F8FAFC;        /* High-contrast crisp light surface */
+
+    /* 2. Primary Accent: Smash Volt (Shuttlecock neon lime / court line green) */
+    --color-volt: #CCFF00;
+    --color-volt-hover: #B5E600;
+    --color-volt-light: #F4FFCC;
+    --color-volt-deep: #15803D;
+    --color-volt-contrast: #0A0F1D;      /* WCAG AAA Accessible text on volt (14.2:1) */
+
+    /* 3. Secondary Accent: Speed Orange (Shuttlecock feather / urgent state) */
+    --color-orange: #FF5500;
+    --color-orange-hover: #E04A00;
+    --color-orange-light: #FFF0EA;
+    --color-orange-contrast: #FFFFFF;
+
+    /* 4. Neutral Athletic Slate */
+    --color-slate-900: #0F172A;
+    --color-slate-800: #1E293B;
+    --color-slate-700: #334155;
+    --color-slate-500: #64748B;
+    --color-slate-400: #94A3B8;
+    --color-slate-300: #CBD5E1;
+    --color-slate-200: #E2E8F0;
+    --color-slate-100: #F1F5F9;
+
+    /* 5. Typography */
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: 'Barlow Condensed', sans-serif;
+
+    /* 6. Elevation & Glow */
+    --glow-volt: 0 0 25px -5px rgba(204, 255, 0, 0.35);
+    --glow-orange: 0 0 20px -4px rgba(255, 85, 0, 0.35);
+}
+
+/* Typography Helpers */
+.font-display {
+    font-family: var(--font-display);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+.font-sans-athletic {
+    font-family: var(--font-sans);
+}
+
+.athletic-number {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+}
+
+/* Badminton Court Accents & Badges */
+.court-badge-volt {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-volt);
+    color: var(--color-volt-contrast);
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transform: skewX(-8deg);
+    border-radius: 3px;
+    padding: 2px 8px;
+}
+
+.court-badge-volt > span {
+    transform: skewX(8deg);
+}
+
+.court-badge-orange {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-orange);
+    color: var(--color-orange-contrast);
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transform: skewX(-8deg);
+    border-radius: 3px;
+    padding: 2px 8px;
+}
+
+.court-badge-orange > span {
+    transform: skewX(8deg);
+}
+
+/* Court Active Outline (Sport performance highlight) */
+.court-card-active {
+    border-color: var(--color-volt);
+    box-shadow: 0 14px 34px -8px rgba(204, 255, 0, 0.25), 0 4px 12px -2px rgba(10, 15, 29, 0.08);
+}
+
+/* Diagonal line decoration inspired by court lines */
+.court-stripe-accent {
+    position: relative;
+    overflow: hidden;
+}
+
+.court-stripe-accent::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 100%;
+    background: linear-gradient(135deg, transparent 50%, var(--color-volt) 50%);
+    opacity: 0.9;
+    pointer-events: none;
+}
+

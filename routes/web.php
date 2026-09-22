@@ -26,11 +26,20 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Customer Booking routes
+    Route::get('/courts/search', [\App\Http\Controllers\CourtSearchController::class, 'index'])->name('courts.search');
     Route::get('/bookings', [BookingController::class, 'create'])->name('bookings.create');
     Route::get('/courts/{court}/availability', [BookingController::class, 'availability'])->name('courts.availability');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/my-bookings', [BookingController::class, 'myBookings'])->name('my-bookings.index');
     Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+
+    // Payment Simulation routes
+    Route::get('/payments/{payment}', [\App\Http\Controllers\PaymentController::class, 'show'])->name('payments.show');
+    Route::post('/payments/{payment}/pay', [\App\Http\Controllers\PaymentController::class, 'pay'])->name('payments.pay');
+    Route::get('/payments/{payment}/waiting', [\App\Http\Controllers\PaymentController::class, 'waiting'])->name('payments.waiting');
+    Route::post('/payments/{payment}/simulate-success', [\App\Http\Controllers\PaymentController::class, 'simulateSuccess'])->name('payments.simulate-success');
+    Route::post('/payments/{payment}/simulate-failed', [\App\Http\Controllers\PaymentController::class, 'simulateFailed'])->name('payments.simulate-failed');
+    Route::get('/payments/{payment}/invoice', [\App\Http\Controllers\PaymentController::class, 'invoice'])->name('payments.invoice');
 });
 
 // Admin routes — protected by role:admin middleware

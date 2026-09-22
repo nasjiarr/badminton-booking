@@ -43,6 +43,12 @@ const showingNavigationDropdown = ref(false);
                                     Dashboard
                                 </NavLink>
                                 <NavLink
+                                    :href="route('courts.search')"
+                                    :active="route().current('courts.search')"
+                                >
+                                    🔍 Cari Lapangan
+                                </NavLink>
+                                <NavLink
                                     :href="route('bookings.create')"
                                     :active="route().current('bookings.*')"
                                 >
@@ -166,6 +172,12 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('courts.search')"
+                            :active="route().current('courts.search')"
+                        >
+                            🔍 Cari Lapangan
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('bookings.create')"

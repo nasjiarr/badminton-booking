@@ -6,9 +6,9 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts -->
+        <!-- Fonts: Plus Jakarta Sans (Clean Body/UI) & Barlow Condensed (Bold Athletic Display & Numbers) -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800|barlow-condensed:600,700,800,900&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         @routes

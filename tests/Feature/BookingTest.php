@@ -124,7 +124,8 @@ class BookingTest extends TestCase
         ]);
 
         $response->assertSessionHasNoErrors();
-        $response->assertRedirect(route('my-bookings.index'));
+        $createdBooking = \App\Models\Booking::first();
+        $response->assertRedirect(route('payments.show', $createdBooking->payment->id));
 
         $this->assertDatabaseHas('bookings', [
             'user_id' => $this->user->id,
@@ -138,8 +139,7 @@ class BookingTest extends TestCase
     }
 
     /**
-     * Requirement 7:
-     * 2 request booking bersamaan ke slot yang sama harus menghasilkan hanya 1 booking yang berhasil.
+     * Test Anti-Bentrok concurrency locking.
      */
     public function test_anti_bentrok_concurrent_booking_to_same_slot_only_one_succeeds(): void
     {
@@ -156,7 +156,8 @@ class BookingTest extends TestCase
         ]);
 
         $response1->assertSessionHasNoErrors();
-        $response1->assertRedirect(route('my-bookings.index'));
+        $createdBooking1 = \App\Models\Booking::latest('id')->first();
+        $response1->assertRedirect(route('payments.show', $createdBooking1->payment->id));
 
         // Request 2: User 2 immediately attempts to book the EXACT SAME slot
         $response2 = $this->actingAs($this->otherUser)->post(route('bookings.store'), [

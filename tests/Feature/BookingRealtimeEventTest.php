@@ -57,7 +57,8 @@ class BookingRealtimeEventTest extends TestCase
         ]);
 
         $response->assertSessionHasNoErrors();
-        $response->assertRedirect(route('my-bookings.index'));
+        $createdBooking = \App\Models\Booking::first();
+        $response->assertRedirect(route('payments.show', $createdBooking->payment->id));
 
         Event::assertDispatched(BookingCreated::class, function (BookingCreated $event) use ($targetDate) {
             $channels = $event->broadcastOn();

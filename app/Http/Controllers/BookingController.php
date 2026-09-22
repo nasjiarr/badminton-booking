@@ -42,6 +42,8 @@ class BookingController extends Controller
             'courts' => $courts,
             'initialCourtId' => $request->query('court_id') ? (int) $request->query('court_id') : ($courts->first()['id'] ?? null),
             'initialDate' => $request->query('date', now()->format('Y-m-d')),
+            'initialStartTime' => $request->query('start_time'),
+            'initialEndTime' => $request->query('end_time'),
         ]);
     }
 
@@ -211,7 +213,7 @@ class BookingController extends Controller
 
             $totalPrice = $hours * (float) $court->price_per_hour;
 
-            return Booking::create([
+            $booking = Booking::create([
                 'user_id' => $user->id,
                 'court_id' => $court->id,
                 'booking_date' => $bookingDate,
@@ -223,12 +225,22 @@ class BookingController extends Controller
                 'is_recurring' => false,
                 'recurring_booking_id' => null,
             ]);
+
+            \App\Models\Payment::create([
+                'booking_id' => $booking->id,
+                'amount' => $totalPrice,
+                'method' => 'simulasi_transfer',
+                'status' => 'pending',
+                'invoice_number' => \App\Models\Payment::generateInvoiceNumber(),
+            ]);
+
+            return $booking;
         });
 
         event(new BookingCreated($booking));
 
-        return redirect()->route('my-bookings.index')
-            ->with('success', 'Booking berhasil dibuat! Status saat ini menunggu pembayaran (pending).');
+        return redirect()->route('payments.show', $booking->payment->id)
+            ->with('success', 'Booking berhasil dibuat! Silakan pilih metode pembayaran.');
     }
 
     /**
@@ -239,7 +251,7 @@ class BookingController extends Controller
         $statusFilter = $request->query('status', 'all');
 
         $query = $request->user()->bookings()
-            ->with('court')
+            ->with(['court', 'payment'])
             ->latest('booking_date')
             ->latest('start_time');
 
@@ -265,6 +277,13 @@ class BookingController extends Controller
                 'notes' => $booking->notes,
                 'can_cancel' => $request->user()->can('cancel', $booking),
                 'created_at' => $booking->created_at->format('d M Y H:i'),
+                'payment' => $booking->payment ? [
+                    'id' => $booking->payment->id,
+                    'invoice_number' => $booking->payment->invoice_number,
+                    'method' => $booking->payment->method,
+                    'status' => $booking->payment->status,
+                    'amount' => (float) $booking->payment->amount,
+                ] : null,
             ];
         });
 

@@ -106,6 +106,31 @@ resources/js/
 └── app.js          # Entry point
 ```
 
+## Fitur Simulasi Pembayaran (Demo / Portfolio Sandbox)
+
+Aplikasi dilengkapi dengan alur simulasi pembayaran lengkap (Virtual Account Bank & QRIS E-Wallet) tanpa memerlukan kartu kredit atau integrasi payment gateway berbayar:
+
+1. **Alur Booking & Checkout**:
+   - Setelah memilih slot dan membuat booking, booking berstatus `pending` dan otomatis membuat invoice unik berformat `INV-YYYYMMDD-XXXX`.
+   - Pengguna diarahkan ke `/payments/{payment}` untuk memilih metode: **Simulasi Transfer Bank** atau **Simulasi E-Wallet**.
+2. **Halaman Menunggu Konfirmasi & Dev Sandbox**:
+   - Pengguna diarahkan ke `/payments/{payment}/waiting` yang menyajikan detail pembayaran (No. Rekening VA / QR Code QRIS simulasi) dan hitung mundur 15 menit.
+   - Tersedia panel **"DEV TESTING SANDBOX"** yang aman dan jelas untuk simulasi:
+     - **Simulasikan Pembayaran Berhasil**: Mengubah status payment menjadi `paid`, status booking menjadi `confirmed`, menetapkan `paid_at`, memicu event `PaymentCompleted`, memberikan poin loyalty reward (1 poin per Rp 10.000), serta mengirim notifikasi email (logged).
+     - **Simulasikan Pembayaran Gagal**: Mengubah status payment menjadi `failed`, membatalkan booking (`cancelled`), membebaskan slot lapangan secara real-time via WebSocket Reverb, dan mengirim notifikasi email pembatalan.
+3. **Official Printable Invoice**:
+   - Invoice resmi berdesain modern & sporty dapat diakses dan dicetak kapan saja melalui `/payments/{payment}/invoice` atau menu **"Booking Saya"** (`/my-bookings`).
+4. **Auto-Expiry Pending Bookings (15 Menit)**:
+   - Command terjadwal `bookings:expire-pending` otomatis membatalkan booking berstatus `pending` yang belum dibayar lebih dari 15 menit.
+
+```bash
+# Menjalankan manual pemeriksaan & pembatalan booking pending kadaluarsa
+php artisan bookings:expire-pending
+
+# Menjalankan scheduler Laravel di local
+php artisan schedule:work
+```
+
 ## Development Commands
 
 ```bash
@@ -114,6 +139,9 @@ npm run dev
 
 # Jalankan WebSocket server Reverb
 php artisan reverb:start
+
+# Jalankan scheduler untuk auto-cancel pending bookings
+php artisan schedule:work
 
 # Build untuk production
 npm run build
@@ -131,3 +159,4 @@ php artisan migrate:fresh --seed
 ## License
 
 [MIT License](LICENSE)
+

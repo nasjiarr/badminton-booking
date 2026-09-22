@@ -1,5 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Toast from '@/Components/Toast.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import Modal from '@/Components/Modal.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -101,6 +102,7 @@ const getStatusLabel = (status) => {
     <Head title="Booking Saya" />
 
     <AuthenticatedLayout>
+        <Toast />
         <template #header>
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
@@ -214,9 +216,34 @@ const getStatusLabel = (status) => {
                                 </span>
                             </div>
 
-                            <!-- Cancel button if eligible under policy -->
-                            <div v-if="booking.can_cancel">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <!-- Pay now button for pending bookings -->
+                                <Link
+                                    v-if="booking.status === 'pending' && booking.payment"
+                                    :href="route('payments.show', booking.payment.id)"
+                                    class="inline-flex items-center gap-1.5 rounded-lg bg-volt px-3.5 py-1.5 font-display font-black text-xs uppercase tracking-wider text-volt-contrast shadow-sm hover:bg-volt-hover hover:shadow-volt-glow-sm transition active:scale-[0.98]"
+                                >
+                                    <span>Bayar Sekarang</span>
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                </Link>
+
+                                <!-- View invoice for paid bookings -->
+                                <Link
+                                    v-if="booking.payment && booking.payment.status === 'paid'"
+                                    :href="route('payments.invoice', booking.payment.id)"
+                                    class="inline-flex items-center gap-1.5 rounded-lg border-2 border-courtSlate-200 bg-white px-3.5 py-1.5 font-display font-extrabold text-xs uppercase tracking-wider text-courtSlate-800 hover:bg-courtSlate-100 transition shadow-xs"
+                                >
+                                    <svg class="h-3.5 w-3.5 text-courtSlate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <span>Lihat Invoice</span>
+                                </Link>
+
+                                <!-- Cancel button if eligible under policy -->
                                 <button
+                                    v-if="booking.can_cancel"
                                     type="button"
                                     @click="openCancelModal(booking)"
                                     class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition"
