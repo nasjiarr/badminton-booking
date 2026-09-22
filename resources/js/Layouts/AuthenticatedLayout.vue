@@ -60,6 +60,12 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Booking Saya
                                 </NavLink>
+                                <NavLink
+                                    :href="route('recurring-bookings.index')"
+                                    :active="route().current('recurring-bookings.*')"
+                                >
+                                    🔁 Booking Rutin
+                                </NavLink>
                             </div>
                         </div>
 
@@ -190,6 +196,12 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('my-bookings.*')"
                         >
                             Booking Saya
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('recurring-bookings.index')"
+                            :active="route().current('recurring-bookings.*')"
+                        >
+                            🔁 Booking Rutin
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             v-if="$page.props.auth.user.is_admin"

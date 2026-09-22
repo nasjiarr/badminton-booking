@@ -27,6 +27,28 @@ class StoreBookingRequest extends FormRequest
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
             'notes' => 'nullable|string|max:500',
+            'is_recurring' => 'nullable|boolean',
+            'recurring_end_date' => [
+                'required_if:is_recurring,true,1',
+                'nullable',
+                'date',
+                'date_format:Y-m-d',
+                'after:booking_date',
+                function ($attribute, $value, $fail) {
+                    if ($this->boolean('is_recurring') && $value && $this->input('booking_date')) {
+                        try {
+                            $start = \Carbon\Carbon::createFromFormat('Y-m-d', $this->input('booking_date'));
+                            $end = \Carbon\Carbon::createFromFormat('Y-m-d', $value);
+                            $maxEnd = $start->copy()->addMonths(3);
+                            if ($end->gt($maxEnd)) {
+                                $fail('Rentang booking rutin maksimal 3 bulan ke depan.');
+                            }
+                        } catch (\Exception $e) {
+                            // Ignored, handled by date_format
+                        }
+                    }
+                },
+            ],
         ];
     }
 

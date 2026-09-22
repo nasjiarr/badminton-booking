@@ -237,6 +237,16 @@ const formatPrice = (price) => {
                                 </div>
                             </div>
 
+                            <!-- Recurring Booking Badge if applicable -->
+                            <div v-if="payment.is_recurring && payment.recurring" class="mb-4 p-3 rounded-lg bg-indigo-50 border border-indigo-200">
+                                <div class="flex items-center gap-1.5 text-xs font-black text-indigo-700 uppercase">
+                                    <span>🔁 Paket Booking Rutin ({{ payment.recurring.total_sessions }} Sesi)</span>
+                                </div>
+                                <p class="text-[11px] text-indigo-600 mt-0.5">
+                                    Setiap {{ payment.recurring.day_name }}, periode {{ payment.recurring.start_date }} s/d {{ payment.recurring.end_date }}. Pembayaran di muka untuk seluruh sesi.
+                                </p>
+                            </div>
+
                             <!-- Details list -->
                             <dl class="space-y-3 text-sm border-y border-courtSlate-100 py-4 mb-4">
                                 <div class="flex justify-between">

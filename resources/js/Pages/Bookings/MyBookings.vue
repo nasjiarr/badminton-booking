@@ -113,15 +113,29 @@ const getStatusLabel = (status) => {
                         Kelola dan pantau seluruh jadwal pemesanan lapangan Anda.
                     </p>
                 </div>
-                <Link
-                    :href="route('bookings.create')"
-                    class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
-                >
-                    <svg class="-ml-0.5 mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Booking Lapangan Baru
-                </Link>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg border border-gray-200">
+                        <span class="px-3 py-1.5 rounded-md text-xs font-bold bg-white text-gray-900 shadow-sm">
+                            Booking Satuan
+                        </span>
+                        <Link
+                            :href="route('recurring-bookings.index')"
+                            class="px-3 py-1.5 rounded-md text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-white/50 transition"
+                        >
+                            🔁 Booking Rutin
+                        </Link>
+                    </div>
+
+                    <Link
+                        :href="route('bookings.create')"
+                        class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
+                    >
+                        <svg class="-ml-0.5 mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Booking Baru
+                    </Link>
+                </div>
             </div>
         </template>
 

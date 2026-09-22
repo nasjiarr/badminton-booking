@@ -33,6 +33,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-bookings', [BookingController::class, 'myBookings'])->name('my-bookings.index');
     Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 
+    // Recurring Bookings routes
+    Route::get('/my-recurring-bookings', [\App\Http\Controllers\RecurringBookingController::class, 'index'])->name('recurring-bookings.index');
+    Route::patch('/recurring-bookings/{recurringBooking}/cancel', [\App\Http\Controllers\RecurringBookingController::class, 'cancel'])->name('recurring-bookings.cancel');
+
     // Payment Simulation routes
     Route::get('/payments/{payment}', [\App\Http\Controllers\PaymentController::class, 'show'])->name('payments.show');
     Route::post('/payments/{payment}/pay', [\App\Http\Controllers\PaymentController::class, 'pay'])->name('payments.pay');

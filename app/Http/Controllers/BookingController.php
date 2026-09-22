@@ -8,6 +8,8 @@ use App\Http\Requests\StoreBookingRequest;
 use App\Models\Booking;
 use App\Models\Court;
 use App\Models\CourtSchedule;
+use App\Models\Payment;
+use App\Models\RecurringBooking;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -128,120 +130,240 @@ class BookingController extends Controller
     /**
      * Store a new booking with anti-bentrok pessimistic locking.
      */
-    public function store(StoreBookingRequest $request)
-    {
-        $user = $request->user();
-        $courtId = (int) $request->validated('court_id');
-        $bookingDate = $request->validated('booking_date');
-        $startTime = $request->validated('start_time');
-        $endTime = $request->validated('end_time');
-        $notes = $request->validated('notes');
+    /**
+     * Store a new booking (single or recurring) with anti-bentrok pessimistic locking.
+     */
+     public function store(StoreBookingRequest $request)
+     {
+         $user = $request->user();
+         $courtId = (int) $request->validated('court_id');
+         $bookingDate = $request->validated('booking_date');
+         $startTime = $request->validated('start_time');
+         $endTime = $request->validated('end_time');
+         $notes = $request->validated('notes');
+         $isRecurring = $request->boolean('is_recurring');
+         $recurringEndDate = $request->validated('recurring_end_date');
 
-        $booking = DB::transaction(function () use ($user, $courtId, $bookingDate, $startTime, $endTime, $notes) {
-            /**
-             * =========================================================================
-             * STRATEGI VALIDASI ANTI-BENTROK / RACE CONDITION (PESSIMISTIC LOCKING)
-             * =========================================================================
-             * Masalah:
-             * Jika 2 pengguna menekan tombol "Booking Sekarang" secara bersamaan untuk
-             * lapangan dan jam yang sama, kedua request dapat mengecek ketersediaan pada
-             * milidetik yang sama sebelum salah satu data tersimpan (phantom read).
-             * Akibatnya, kedua request menganggap slot tersebut kosong dan terjadi double-booking.
-             *
-             * Solusi:
-             * 1. DB::transaction(): Menjamin seluruh proses (lock, validasi overlap, insert)
-             *    bersifat atomik (ACID).
-             * 2. Court::lockForUpdate(): Melakukan exclusive lock pada baris Court yang
-             *    bersangkutan di MySQL (SELECT ... FOR UPDATE).
-             *    Artinya, request kedua yang mencoba memesan lapangan yang sama HARUS MENUNGGU
-             *    (antre) sampai transaksi pertama selesai (commit / rollback).
-             * 3. Booking overlap check with lockForUpdate(): Memastikan tidak ada booking aktif
-             *    (status != 'cancelled') yang bertabrakan waktu.
-             * 4. Jika terjadi bentrok, transaksi langsung memicu ValidationException dan rollback.
-             * 5. Keuntungan: Sangat handal mencegah bentrok pada level database tanpa mengunci
-             *    lapangan lain (pemesanan lapangan A dan B tetap bisa berjalan paralel).
-             * =========================================================================
-             */
-            $court = Court::where('id', $courtId)
-                ->where('is_active', true)
-                ->lockForUpdate()
-                ->firstOrFail();
+         // Hitung durasi jam
+         $startCarbon = Carbon::createFromFormat('H:i', $startTime);
+         $endCarbon = Carbon::createFromFormat('H:i', $endTime);
+         $durationMinutes = $startCarbon->diffInMinutes($endCarbon);
+         $hours = $durationMinutes / 60;
 
-            // Cek jadwal operasional lapangan
-            $dayOfWeek = Carbon::createFromFormat('Y-m-d', $bookingDate)->dayOfWeek;
-            $schedule = CourtSchedule::where('court_id', $court->id)
-                ->where('day_of_week', $dayOfWeek)
-                ->first();
+         if ($hours <= 0) {
+             throw ValidationException::withMessages([
+                 'end_time' => 'Durasi booking minimal 1 jam.',
+             ]);
+         }
 
-            $openTime = $schedule ? substr($schedule->open_time, 0, 5) : '06:00';
-            $closeTime = $schedule ? substr($schedule->close_time, 0, 5) : '22:00';
+         if ($isRecurring) {
+             // Handle Recurring Booking Flow
+             $startIter = Carbon::createFromFormat('Y-m-d', $bookingDate);
+             $endIter = Carbon::createFromFormat('Y-m-d', $recurringEndDate);
+             $dayOfWeek = $startIter->dayOfWeek;
 
-            if ($startTime < $openTime || $endTime > $closeTime) {
-                throw ValidationException::withMessages([
-                    'slots' => "Jam booking harus berada di dalam jam operasional ({$openTime} - {$closeTime}).",
-                ]);
-            }
+             // Generate daftar tanggal per minggu
+             $candidateDates = [];
+             $curr = $startIter->copy();
+             while ($curr->lte($endIter)) {
+                 $candidateDates[] = $curr->copy();
+                 $curr->addWeek();
+             }
 
-            // Cek apakah slot sudah dibooking (overlapping non-cancelled)
-            $conflict = Booking::where('court_id', $court->id)
-                ->where('booking_date', $bookingDate)
-                ->where('status', '!=', 'cancelled')
-                ->where(function ($query) use ($startTime, $endTime) {
-                    $query->where('start_time', '<', $endTime)
-                          ->where('end_time', '>', $startTime);
-                })
-                ->lockForUpdate()
-                ->exists();
+             if (empty($candidateDates)) {
+                 throw ValidationException::withMessages([
+                     'recurring_end_date' => 'Rentang tanggal booking rutin tidak valid.',
+                 ]);
+             }
 
-            if ($conflict) {
-                throw ValidationException::withMessages([
-                    'slots' => "Slot waktu yang dipilih ({$startTime} - {$endTime}) sudah dipesan oleh pengguna lain. Silakan pilih slot lain.",
-                ]);
-            }
+             $result = DB::transaction(function () use ($user, $courtId, $candidateDates, $startIter, $endIter, $dayOfWeek, $startTime, $endTime, $hours, $notes) {
+                 $court = Court::where('id', $courtId)
+                     ->where('is_active', true)
+                     ->lockForUpdate()
+                     ->firstOrFail();
 
-            // Hitung durasi dan total harga
-            $startCarbon = Carbon::createFromFormat('H:i', $startTime);
-            $endCarbon = Carbon::createFromFormat('H:i', $endTime);
-            $durationMinutes = $startCarbon->diffInMinutes($endCarbon);
-            $hours = $durationMinutes / 60;
+                 // Cek jam operasional lapangan untuk hari tersebut
+                 $schedule = CourtSchedule::where('court_id', $court->id)
+                     ->where('day_of_week', $dayOfWeek)
+                     ->first();
 
-            if ($hours <= 0) {
-                throw ValidationException::withMessages([
-                    'end_time' => 'Durasi booking minimal 1 jam.',
-                ]);
-            }
+                 $openTime = $schedule ? substr($schedule->open_time, 0, 5) : '06:00';
+                 $closeTime = $schedule ? substr($schedule->close_time, 0, 5) : '22:00';
 
-            $totalPrice = $hours * (float) $court->price_per_hour;
+                 if ($startTime < $openTime || $endTime > $closeTime) {
+                     throw ValidationException::withMessages([
+                         'slots' => "Jam booking harus berada di dalam jam operasional ({$openTime} - {$closeTime}).",
+                     ]);
+                 }
 
-            $booking = Booking::create([
-                'user_id' => $user->id,
-                'court_id' => $court->id,
-                'booking_date' => $bookingDate,
-                'start_time' => $startTime . ':00',
-                'end_time' => $endTime . ':00',
-                'status' => 'pending',
-                'total_price' => $totalPrice,
-                'notes' => $notes,
-                'is_recurring' => false,
-                'recurring_booking_id' => null,
-            ]);
+                 $sessionPrice = $hours * (float) $court->price_per_hour;
 
-            \App\Models\Payment::create([
-                'booking_id' => $booking->id,
-                'amount' => $totalPrice,
-                'method' => 'simulasi_transfer',
-                'status' => 'pending',
-                'invoice_number' => \App\Models\Payment::generateInvoiceNumber(),
-            ]);
+                 // Evaluasi ketersediaan per minggu (anti-bentrok per sesi)
+                 $successfulDates = [];
+                 $skippedDates = [];
 
-            return $booking;
-        });
+                 foreach ($candidateDates as $targetDate) {
+                     $targetDateStr = $targetDate->format('Y-m-d');
 
-        event(new BookingCreated($booking));
+                     $conflict = Booking::where('court_id', $court->id)
+                         ->where('booking_date', $targetDateStr)
+                         ->where('status', '!=', 'cancelled')
+                         ->where(function ($query) use ($startTime, $endTime) {
+                             $query->where('start_time', '<', $endTime)
+                                   ->where('end_time', '>', $startTime);
+                         })
+                         ->lockForUpdate()
+                         ->exists();
 
-        return redirect()->route('payments.show', $booking->payment->id)
-            ->with('success', 'Booking berhasil dibuat! Silakan pilih metode pembayaran.');
-    }
+                     if ($conflict) {
+                         $skippedDates[] = $targetDateStr;
+                     } else {
+                         $successfulDates[] = $targetDate;
+                     }
+                 }
+
+                 if (empty($successfulDates)) {
+                     throw ValidationException::withMessages([
+                         'slots' => 'Seluruh sesi mingguan pada rentang waktu yang dipilih bentrok dengan pemesanan lain. Tidak ada sesi yang dapat dibuat.',
+                     ]);
+                 }
+
+                 // Buat parent record RecurringBooking
+                 $recurringBooking = RecurringBooking::create([
+                     'user_id' => $user->id,
+                     'court_id' => $court->id,
+                     'day_of_week' => $dayOfWeek,
+                     'start_time' => $startTime . ':00',
+                     'end_time' => $endTime . ':00',
+                     'start_date' => $startIter->format('Y-m-d'),
+                     'end_date' => $endIter->format('Y-m-d'),
+                     'status' => 'active',
+                 ]);
+
+                 // Generate booking individual untuk setiap minggu yang berhasil
+                 $createdBookings = [];
+                 foreach ($successfulDates as $succDate) {
+                     $booking = Booking::create([
+                         'user_id' => $user->id,
+                         'court_id' => $court->id,
+                         'booking_date' => $succDate->format('Y-m-d'),
+                         'start_time' => $startTime . ':00',
+                         'end_time' => $endTime . ':00',
+                         'status' => 'pending',
+                         'total_price' => $sessionPrice,
+                         'notes' => $notes,
+                         'is_recurring' => true,
+                         'recurring_booking_id' => $recurringBooking->id,
+                     ]);
+
+                     Payment::create([
+                         'booking_id' => $booking->id,
+                         'amount' => $sessionPrice,
+                         'method' => 'simulasi_transfer',
+                         'status' => 'pending',
+                         'invoice_number' => Payment::generateInvoiceNumber(),
+                     ]);
+
+                     $createdBookings[] = $booking;
+                 }
+
+                 return [
+                     'recurring' => $recurringBooking,
+                     'bookings' => $createdBookings,
+                     'skipped_dates' => $skippedDates,
+                 ];
+             });
+
+             // Broadcast event real-time untuk setiap booking yang berhasil dibuat
+             foreach ($result['bookings'] as $b) {
+                 event(new BookingCreated($b));
+             }
+
+             // Susun notifikasi informasi skip jika ada
+             $succCount = count($result['bookings']);
+             $skipCount = count($result['skipped_dates']);
+
+             if ($skipCount > 0) {
+                 $skippedList = implode(', ', array_map(fn ($d) => Carbon::parse($d)->translatedFormat('d M Y'), $result['skipped_dates']));
+                 $flashMsg = "Booking rutin berhasil dibuat untuk {$succCount} sesi. {$skipCount} sesi dilewati karena slot sudah terisi ({$skippedList}). Silakan lakukan pembayaran paket di muka.";
+             } else {
+                 $flashMsg = "Booking rutin berhasil dibuat untuk seluruh {$succCount} sesi! Silakan lakukan pembayaran paket di muka.";
+             }
+
+             $firstPayment = $result['bookings'][0]->payment;
+
+             return redirect()->route('payments.show', $firstPayment->id)
+                 ->with('success', $flashMsg);
+         }
+
+         // Single Booking Flow (Standard)
+         $booking = DB::transaction(function () use ($user, $courtId, $bookingDate, $startTime, $endTime, $hours, $notes) {
+             $court = Court::where('id', $courtId)
+                 ->where('is_active', true)
+                 ->lockForUpdate()
+                 ->firstOrFail();
+
+             $dayOfWeek = Carbon::createFromFormat('Y-m-d', $bookingDate)->dayOfWeek;
+             $schedule = CourtSchedule::where('court_id', $court->id)
+                 ->where('day_of_week', $dayOfWeek)
+                 ->first();
+
+             $openTime = $schedule ? substr($schedule->open_time, 0, 5) : '06:00';
+             $closeTime = $schedule ? substr($schedule->close_time, 0, 5) : '22:00';
+
+             if ($startTime < $openTime || $endTime > $closeTime) {
+                 throw ValidationException::withMessages([
+                     'slots' => "Jam booking harus berada di dalam jam operasional ({$openTime} - {$closeTime}).",
+                 ]);
+             }
+
+             $conflict = Booking::where('court_id', $court->id)
+                 ->where('booking_date', $bookingDate)
+                 ->where('status', '!=', 'cancelled')
+                 ->where(function ($query) use ($startTime, $endTime) {
+                     $query->where('start_time', '<', $endTime)
+                           ->where('end_time', '>', $startTime);
+                 })
+                 ->lockForUpdate()
+                 ->exists();
+
+             if ($conflict) {
+                 throw ValidationException::withMessages([
+                     'slots' => "Slot waktu yang dipilih ({$startTime} - {$endTime}) sudah dipesan oleh pengguna lain. Silakan pilih slot lain.",
+                 ]);
+             }
+
+             $totalPrice = $hours * (float) $court->price_per_hour;
+
+             $booking = Booking::create([
+                 'user_id' => $user->id,
+                 'court_id' => $court->id,
+                 'booking_date' => $bookingDate,
+                 'start_time' => $startTime . ':00',
+                 'end_time' => $endTime . ':00',
+                 'status' => 'pending',
+                 'total_price' => $totalPrice,
+                 'notes' => $notes,
+                 'is_recurring' => false,
+                 'recurring_booking_id' => null,
+             ]);
+
+             Payment::create([
+                 'booking_id' => $booking->id,
+                 'amount' => $totalPrice,
+                 'method' => 'simulasi_transfer',
+                 'status' => 'pending',
+                 'invoice_number' => Payment::generateInvoiceNumber(),
+             ]);
+
+             return $booking;
+         });
+
+         event(new BookingCreated($booking));
+
+         return redirect()->route('payments.show', $booking->payment->id)
+             ->with('success', 'Booking berhasil dibuat! Silakan pilih metode pembayaran.');
+     }
 
     /**
      * Display logged-in user's bookings history.

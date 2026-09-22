@@ -325,12 +325,57 @@ const totalPrice = computed(() => {
 });
 
 // Booking form submission
+const isRecurring = ref(false);
+const recurringEndDate = ref('');
+
+const selectedDayName = computed(() => {
+    if (!selectedDate.value) return '';
+    const date = new Date(selectedDate.value + 'T00:00:00');
+    return new Intl.DateTimeFormat('id-ID', { weekday: 'long' }).format(date);
+});
+
+const minRecurringEndDate = computed(() => {
+    if (!selectedDate.value) return '';
+    const d = new Date(selectedDate.value + 'T00:00:00');
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().split('T')[0];
+});
+
+const maxRecurringEndDate = computed(() => {
+    if (!selectedDate.value) return '';
+    const d = new Date(selectedDate.value + 'T00:00:00');
+    d.setDate(d.getDate() + 90); // Maksimal ~3 bulan
+    return d.toISOString().split('T')[0];
+});
+
+const setRecurringWeeks = (weeks) => {
+    if (!selectedDate.value) return;
+    const d = new Date(selectedDate.value + 'T00:00:00');
+    d.setDate(d.getDate() + (weeks * 7));
+    recurringEndDate.value = d.toISOString().split('T')[0];
+};
+
+const recurringSessionsCount = computed(() => {
+    if (!isRecurring.value || !selectedDate.value || !recurringEndDate.value) return 1;
+    const start = new Date(selectedDate.value + 'T00:00:00');
+    const end = new Date(recurringEndDate.value + 'T00:00:00');
+    if (end < start) return 1;
+    const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24));
+    return Math.max(1, Math.floor(diffDays / 7) + 1);
+});
+
+const totalRecurringPrice = computed(() => {
+    return totalPrice.value * recurringSessionsCount.value;
+});
+
 const form = useForm({
     court_id: null,
     booking_date: '',
     start_time: '',
     end_time: '',
     notes: '',
+    is_recurring: false,
+    recurring_end_date: '',
 });
 
 const submitBooking = () => {
@@ -341,6 +386,8 @@ const submitBooking = () => {
     form.start_time = bookingStartTime.value;
     form.end_time = bookingEndTime.value;
     form.notes = notes.value;
+    form.is_recurring = isRecurring.value;
+    form.recurring_end_date = isRecurring.value ? recurringEndDate.value : null;
 
     form.post(route('bookings.store'), {
         preserveScroll: true,
@@ -722,6 +769,91 @@ const submitBooking = () => {
                                 </div>
                             </div>
 
+                            <!-- OPSI BOOKING RUTIN (MINGGUAN) -->
+                            <div class="rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 transition">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <input
+                                            type="checkbox"
+                                            id="is_recurring_checkbox"
+                                            v-model="isRecurring"
+                                            class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                        />
+                                        <div>
+                                            <label for="is_recurring_checkbox" class="text-sm font-bold text-gray-900 cursor-pointer flex items-center gap-1.5">
+                                                <span>🔁 Jadikan Booking Rutin (Tiap Minggu)</span>
+                                                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">Maks. 3 Bulan</span>
+                                            </label>
+                                            <p class="text-xs text-gray-500 mt-0.5">
+                                                Otomatis dipesan setiap hari <strong>{{ selectedDayName }}</strong> jam <strong>{{ bookingStartTime }} - {{ bookingEndTime }}</strong> di lapangan yang sama.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div v-if="isRecurring" class="mt-4 pt-4 border-t border-indigo-100 space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 mb-1.5">
+                                            Pilih Durasi Rutin:
+                                        </label>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <button
+                                                type="button"
+                                                @click="setRecurringWeeks(4)"
+                                                class="px-3 py-2 text-xs font-bold rounded-lg border border-indigo-200 bg-white hover:bg-indigo-50 text-indigo-700 transition text-center"
+                                            >
+                                                4 Minggu (1 Bulan)
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="setRecurringWeeks(8)"
+                                                class="px-3 py-2 text-xs font-bold rounded-lg border border-indigo-200 bg-white hover:bg-indigo-50 text-indigo-700 transition text-center"
+                                            >
+                                                8 Minggu (2 Bulan)
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="setRecurringWeeks(12)"
+                                                class="px-3 py-2 text-xs font-bold rounded-lg border border-indigo-200 bg-white hover:bg-indigo-50 text-indigo-700 transition text-center"
+                                            >
+                                                12 Minggu (3 Bulan)
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label for="recurring_end_date" class="block text-xs font-bold text-gray-700 mb-1">
+                                            Atau Tentukan Tanggal Berakhir:
+                                        </label>
+                                        <input
+                                            type="date"
+                                            id="recurring_end_date"
+                                            v-model="recurringEndDate"
+                                            :min="minRecurringEndDate"
+                                            :max="maxRecurringEndDate"
+                                            class="w-full text-sm rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                        />
+                                        <InputError class="mt-1" :message="form.errors.recurring_end_date" />
+                                    </div>
+
+                                    <!-- Summary Recurring Info -->
+                                    <div class="bg-white rounded-lg p-3 border border-indigo-100 flex items-center justify-between text-xs">
+                                        <div>
+                                            <span class="text-gray-500">Estimasi Sesi:</span>
+                                            <span class="font-bold text-gray-900 ml-1">{{ recurringSessionsCount }} Sesi Mingguan</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500">Total Biaya Paket:</span>
+                                            <span class="font-black text-emerald-600 text-sm ml-1">{{ formatPrice(totalRecurringPrice) }}</span>
+                                        </div>
+                                    </div>
+
+                                    <p class="text-[11px] text-indigo-800 leading-tight">
+                                        ⚡ <strong>Anti-Bentrok Fleksibel:</strong> Jika salah satu minggu bentrok dengan pengguna lain, sistem otomatis melewati (skip) minggu tersebut tanpa membatalkan minggu lainnya.
+                                    </p>
+                                </div>
+                            </div>
+
                             <!-- Catatan Opsional -->
                             <div>
                                 <InputLabel for="notes" value="Catatan Tambahan (Opsional)" />
@@ -753,6 +885,7 @@ const submitBooking = () => {
                                     class="px-6 py-3 text-sm font-bold bg-indigo-600 hover:bg-indigo-700"
                                 >
                                     <span v-if="form.processing">Memproses Booking...</span>
+                                    <span v-else-if="isRecurring">🏸 Booking Rutin {{ recurringSessionsCount }} Sesi ({{ formatPrice(totalRecurringPrice) }})</span>
                                     <span v-else>🏸 Booking Sekarang ({{ formatPrice(totalPrice) }})</span>
                                 </PrimaryButton>
                             </div>

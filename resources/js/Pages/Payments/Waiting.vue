@@ -108,6 +108,27 @@ const copyVa = () => {
                         <span class="court-badge-orange text-xs"><span>MENUNGGU BAYAR</span></span>
                     </div>
 
+                    <!-- Recurring Booking Bundle Summary if Applicable -->
+                    <div v-if="payment.is_recurring && payment.recurring" class="mb-6 p-4 rounded-xl bg-indigo-50 border-2 border-indigo-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-black text-indigo-800 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>🔁 Paket Booking Rutin ({{ payment.recurring.total_sessions }} Sesi)</span>
+                            </span>
+                            <span class="text-xs font-extrabold text-indigo-700 bg-white px-2.5 py-0.5 rounded-full border border-indigo-200">
+                                Setiap {{ payment.recurring.day_name }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-indigo-700 leading-relaxed mb-3">
+                            Pembayaran ini mencakup seluruh {{ payment.recurring.total_sessions }} sesi mingguan periode <strong>{{ payment.recurring.start_date }} s/d {{ payment.recurring.end_date }}</strong>.
+                        </p>
+                        <div class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                            <div v-for="(sess, idx) in payment.recurring.sessions" :key="sess.id" class="flex justify-between items-center text-xs bg-white px-3 py-1.5 rounded-lg border border-indigo-100">
+                                <span class="font-medium text-courtSlate-700">Minggu {{ idx + 1 }}: {{ sess.booking_date_formatted }}</span>
+                                <span class="font-bold text-courtSlate-900">{{ formatPrice(sess.total_price) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Transfer VA View -->
                     <div v-if="payment.method === 'simulasi_transfer'" class="space-y-6">
                         <div class="rounded-xl bg-courtSlate-50 border-2 border-courtSlate-200 p-6">

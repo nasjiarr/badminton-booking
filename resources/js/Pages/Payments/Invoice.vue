@@ -139,7 +139,28 @@ const formatPrice = (price) => {
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-courtSlate-100 text-sm">
-                                <tr>
+                                <template v-if="payment.is_recurring && payment.recurring">
+                                    <tr v-for="(sess, sIdx) in payment.recurring.sessions" :key="sess.id">
+                                        <td class="py-3">
+                                            <div class="font-display font-bold text-sm text-courtSlate-900 uppercase">
+                                                Sewa {{ payment.court.name }} — Sesi Minggu {{ sIdx + 1 }}
+                                            </div>
+                                            <div class="text-xs text-courtSlate-500 mt-0.5">
+                                                {{ sess.booking_date_formatted }} • Jam: {{ sess.start_time }} - {{ sess.end_time }} WIB
+                                            </div>
+                                        </td>
+                                        <td class="py-3 text-center font-semibold text-courtSlate-800">
+                                            {{ payment.booking.duration_hours }} Jam
+                                        </td>
+                                        <td class="py-3 text-right font-medium text-courtSlate-600">
+                                            {{ formatPrice(payment.court.price_per_hour) }}
+                                        </td>
+                                        <td class="py-3 text-right athletic-number font-black text-sm text-courtSlate-900">
+                                            {{ formatPrice(sess.total_price) }}
+                                        </td>
+                                    </tr>
+                                </template>
+                                <tr v-else>
                                     <td class="py-4">
                                         <div class="font-display font-black text-base text-courtSlate-900 uppercase">
                                             Sewa {{ payment.court.name }}

@@ -66,5 +66,15 @@ class RecurringBooking extends Model
     {
         return $this->hasMany(Booking::class);
     }
+
+    /**
+     * Get Indonesian day name for the recurring day of week.
+     */
+    public function getDayNameAttribute(): string
+    {
+        $days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+        return $days[$this->day_of_week] ?? '';
+    }
 }
 
