@@ -248,10 +248,22 @@ const courtComparisonOptions = computed(() => ({
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-volt/10 text-arena-base text-xs font-display font-black uppercase tracking-wider rounded border border-volt/30">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Sistem Aktif
-                    </span>
+                    <a
+                        :href="route('admin.reports.export.excel', { start_date: filterForm.start_date, end_date: filterForm.end_date })"
+                        target="_blank"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-display font-bold uppercase tracking-wider rounded-lg shadow-xs transition -skew-x-6 cursor-pointer"
+                        title="Unduh laporan Excel sesuai rentang filter saat ini"
+                    >
+                        <span class="inline-block transform skew-x-6">📥 Export Excel</span>
+                    </a>
+                    <a
+                        :href="route('admin.reports.export.pdf', { start_date: filterForm.start_date, end_date: filterForm.end_date })"
+                        target="_blank"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-courtOrange hover:bg-courtOrange-hover text-white text-xs font-display font-bold uppercase tracking-wider rounded-lg shadow-xs transition -skew-x-6 cursor-pointer"
+                        title="Unduh ringkasan PDF sesuai rentang filter saat ini"
+                    >
+                        <span class="inline-block transform skew-x-6">📄 Export PDF</span>
+                    </a>
                 </div>
             </div>
 
