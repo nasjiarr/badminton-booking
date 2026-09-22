@@ -5,6 +5,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import Toast from '@/Components/Toast.vue';
 import { Link } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
@@ -12,6 +13,8 @@ const showingNavigationDropdown = ref(false);
 
 <template>
     <div>
+        <Toast />
+
         <div class="min-h-screen bg-gray-100">
             <nav
                 class="border-b border-gray-100 bg-white"
@@ -38,6 +41,18 @@ const showingNavigationDropdown = ref(false);
                                     :active="route().current('dashboard')"
                                 >
                                     Dashboard
+                                </NavLink>
+                                <NavLink
+                                    :href="route('bookings.create')"
+                                    :active="route().current('bookings.*')"
+                                >
+                                    Booking Lapangan
+                                </NavLink>
+                                <NavLink
+                                    :href="route('my-bookings.index')"
+                                    :active="route().current('my-bookings.*')"
+                                >
+                                    Booking Saya
                                 </NavLink>
                             </div>
                         </div>
@@ -71,6 +86,12 @@ const showingNavigationDropdown = ref(false);
                                     </template>
 
                                     <template #content>
+                                        <DropdownLink
+                                            v-if="$page.props.auth.user.is_admin"
+                                            :href="route('admin.courts.index')"
+                                        >
+                                            🏸 Admin Panel
+                                        </DropdownLink>
                                         <DropdownLink
                                             :href="route('profile.edit')"
                                         >
@@ -145,6 +166,24 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('bookings.create')"
+                            :active="route().current('bookings.*')"
+                        >
+                            Booking Lapangan
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('my-bookings.index')"
+                            :active="route().current('my-bookings.*')"
+                        >
+                            Booking Saya
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            v-if="$page.props.auth.user.is_admin"
+                            :href="route('admin.courts.index')"
+                        >
+                            🏸 Admin Panel
                         </ResponsiveNavLink>
                     </div>
 

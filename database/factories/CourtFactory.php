@@ -21,8 +21,8 @@ class CourtFactory extends Factory
     {
         return [
             'name' => 'Lapangan ' . fake()->unique()->randomLetter(),
-            'description' => fake()->sentence(),
-            'price_per_hour' => fake()->randomElement([65000, 75000, 85000, 100000, 120000]),
+            'description' => 'Lapangan badminton standar dengan lantai karpet vinil berkualitas, pencahayaan LED terang, dan fasilitas lengkap.',
+            'price_per_hour' => 40000,
             'image_path' => null,
             'is_active' => true,
         ];
