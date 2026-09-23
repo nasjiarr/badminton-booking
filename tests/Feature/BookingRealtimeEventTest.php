@@ -7,7 +7,9 @@ use App\Events\BookingCreated;
 use App\Models\Booking;
 use App\Models\Court;
 use App\Models\CourtSchedule;
+use App\Models\Payment;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
@@ -57,7 +59,7 @@ class BookingRealtimeEventTest extends TestCase
         ]);
 
         $response->assertSessionHasNoErrors();
-        $createdBooking = \App\Models\Booking::first();
+        $createdBooking = Booking::first();
         $response->assertRedirect(route('payments.show', $createdBooking->payment->id));
 
         Event::assertDispatched(BookingCreated::class, function (BookingCreated $event) use ($targetDate) {
@@ -79,7 +81,7 @@ class BookingRealtimeEventTest extends TestCase
         });
     }
 
-    public function test_booking_cancelled_event_is_dispatched_with_correct_payload(): void
+    public function test_booking_cancelled_event_is_dispatched_with_correct_payload_on_manual_cancellation(): void
     {
         Event::fake([BookingCancelled::class]);
 
@@ -119,5 +121,129 @@ class BookingRealtimeEventTest extends TestCase
             return true;
         });
     }
-}
 
+    public function test_booking_cancelled_event_is_dispatched_when_auto_expired_by_scheduler(): void
+    {
+        Event::fake([BookingCancelled::class]);
+
+        $targetDate = now()->addDay()->format('Y-m-d');
+
+        // Create stale pending booking older than 15 minutes
+        $booking = Booking::create([
+            'user_id' => $this->user->id,
+            'court_id' => $this->court->id,
+            'booking_date' => $targetDate,
+            'start_time' => '18:00:00',
+            'end_time' => '20:00:00',
+            'status' => 'pending',
+            'total_price' => 80000,
+            'is_recurring' => false,
+        ]);
+        $booking->created_at = now()->subMinutes(25);
+        $booking->save();
+
+        $payment = Payment::create([
+            'booking_id' => $booking->id,
+            'amount' => 80000,
+            'method' => 'simulasi_transfer',
+            'status' => 'pending',
+            'invoice_number' => 'INV-EXPIRE-TEST',
+        ]);
+        $payment->created_at = now()->subMinutes(25);
+        $payment->save();
+
+        // Run scheduler auto-expire command
+        $this->artisan('bookings:expire-pending')->assertSuccessful();
+
+        $this->assertDatabaseHas('bookings', [
+            'id' => $booking->id,
+            'status' => 'cancelled',
+        ]);
+
+        Event::assertDispatched(BookingCancelled::class, function (BookingCancelled $event) use ($targetDate, $booking) {
+            $channels = $event->broadcastOn();
+            $this->assertEquals("court.{$this->court->id}", $channels[0]->name);
+
+            $payload = $event->broadcastWith();
+            $this->assertEquals($booking->id, $payload['booking_id']);
+            $this->assertEquals($this->court->id, $payload['court_id']);
+            $this->assertEquals($targetDate, $payload['booking_date']);
+            $this->assertEquals('18:00', $payload['start_time']);
+            $this->assertEquals('20:00', $payload['end_time']);
+            $this->assertEquals('cancelled', $payload['status']);
+
+            return true;
+        });
+    }
+
+    public function test_booking_cancelled_event_is_dispatched_when_payment_simulation_fails(): void
+    {
+        Event::fake([BookingCancelled::class]);
+
+        $targetDate = now()->addDay()->format('Y-m-d');
+
+        $booking = Booking::create([
+            'user_id' => $this->user->id,
+            'court_id' => $this->court->id,
+            'booking_date' => $targetDate,
+            'start_time' => '10:00:00',
+            'end_time' => '11:00:00',
+            'status' => 'pending',
+            'total_price' => 40000,
+            'is_recurring' => false,
+        ]);
+
+        $payment = Payment::create([
+            'booking_id' => $booking->id,
+            'amount' => 40000,
+            'method' => 'simulasi_ewallet',
+            'status' => 'pending',
+            'invoice_number' => 'INV-FAIL-SIM',
+        ]);
+
+        $response = $this->actingAs($this->user)->post(route('payments.simulate-failed', $payment->id));
+
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('bookings', [
+            'id' => $booking->id,
+            'status' => 'cancelled',
+        ]);
+
+        Event::assertDispatched(BookingCancelled::class, function (BookingCancelled $event) use ($booking, $targetDate) {
+            $channels = $event->broadcastOn();
+            $this->assertEquals("court.{$this->court->id}", $channels[0]->name);
+
+            $payload = $event->broadcastWith();
+            $this->assertEquals($booking->id, $payload['booking_id']);
+            $this->assertEquals($this->court->id, $payload['court_id']);
+            $this->assertEquals($targetDate, $payload['booking_date']);
+            $this->assertEquals('10:00', $payload['start_time']);
+            $this->assertEquals('11:00', $payload['end_time']);
+            $this->assertEquals('cancelled', $payload['status']);
+
+            return true;
+        });
+    }
+
+    public function test_booking_created_event_is_dispatched_for_each_session_in_recurring_booking(): void
+    {
+        Event::fake([BookingCreated::class]);
+
+        $startDate = now()->addDays(2)->format('Y-m-d');
+        $endDate = Carbon::parse($startDate)->addWeeks(2)->format('Y-m-d'); // 3 weeks total
+
+        $response = $this->actingAs($this->user)->post(route('bookings.store'), [
+            'court_id' => $this->court->id,
+            'booking_date' => $startDate,
+            'start_time' => '20:00',
+            'end_time' => '21:00',
+            'is_recurring' => true,
+            'recurring_end_date' => $endDate,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        // 3 separate BookingCreated events should be dispatched (one for each week's session)
+        Event::assertDispatched(BookingCreated::class, 3);
+    }
+}

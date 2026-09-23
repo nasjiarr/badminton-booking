@@ -86,4 +86,10 @@ Route::get('/sw.js', function () {
     return response(file_get_contents($swPath), 200, ['Content-Type' => 'application/javascript']);
 });
 
+// Debug Real-Time WebSocket broadcast routes (strictly local & testing environments only)
+if (app()->environment('local', 'testing')) {
+    Route::get('/debug/broadcast-test', [\App\Http\Controllers\DebugBroadcastController::class, 'index'])->name('debug.broadcast.index');
+    Route::post('/debug/broadcast-test/trigger', [\App\Http\Controllers\DebugBroadcastController::class, 'trigger'])->name('debug.broadcast.trigger');
+}
+
 require __DIR__.'/auth.php';
