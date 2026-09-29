@@ -5,7 +5,7 @@ import LoadingSkeleton from '@/Components/LoadingSkeleton.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps({
@@ -423,14 +423,33 @@ const submitBooking = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                    <div class="flex items-center gap-2 mb-1.5">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-display font-black tracking-wider uppercase bg-volt text-arena-base border border-volt -skew-x-6 shadow-xs">
+                            <span class="transform skew-x-6 flex items-center gap-1">
+                                <span>🏸</span> RESERVASI GELANGGANG
+                            </span>
+                        </span>
+                        <span class="text-xs font-display font-bold uppercase tracking-wider text-courtSlate-400">
+                            Real-Time Availability System
+                        </span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-display font-black tracking-tight text-courtSlate-900 uppercase">
                         Booking Lapangan Badminton
-                    </h2>
-                    <p class="text-sm text-gray-500 mt-1">
-                        Pilih lapangan, tanggal, dan slot jam yang Anda inginkan.
+                    </h1>
+                    <p class="text-xs sm:text-sm text-courtSlate-600 font-sans mt-1">
+                        Pilih lapangan, tanggal, dan slot jam yang Anda inginkan. Sistem anti-bentrok aktif otomatis.
                     </p>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <Link
+                        :href="route('courts.search')"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-courtSlate-100 border-2 border-courtSlate-200 text-xs font-display font-black uppercase tracking-wider text-courtSlate-800 transition shadow-xs hover:border-courtSlate-300"
+                    >
+                        <span>🔍</span>
+                        <span>Cari Jadwal Kosong</span>
+                    </Link>
                 </div>
             </div>
         </template>
@@ -439,13 +458,18 @@ const submitBooking = () => {
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
                 <!-- STEP 1: PILIH LAPANGAN -->
                 <div>
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-600 text-white font-bold text-sm">
-                            1
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-arena-base text-volt font-display font-black text-sm shadow-xs -skew-x-3">
+                            <span class="skew-x-3">1</span>
                         </span>
-                        <h3 class="text-lg font-bold text-gray-900">
-                            Pilih Lapangan
-                        </h3>
+                        <div>
+                            <h3 class="font-display font-black text-xl uppercase tracking-tight text-courtSlate-900">
+                                Pilih Lapangan
+                            </h3>
+                            <p class="text-xs text-courtSlate-500 font-sans">
+                                4 lapangan karpet vinyl standar BWF siap pakai.
+                            </p>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -600,58 +624,63 @@ const submitBooking = () => {
                 </div>
 
                 <!-- STEP 2: PILIH TANGGAL -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-600 text-white font-bold text-sm">
-                            2
+                <div class="bg-white p-6 sm:p-7 rounded-2xl shadow-card-elevated border-2 border-courtSlate-200">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-arena-base text-volt font-display font-black text-sm shadow-xs -skew-x-3">
+                            <span class="skew-x-3">2</span>
                         </span>
-                        <h3 class="text-lg font-bold text-gray-900">
-                            Pilih Tanggal
-                        </h3>
+                        <div>
+                            <h3 class="font-display font-black text-xl uppercase tracking-tight text-courtSlate-900">
+                                Pilih Tanggal
+                            </h3>
+                            <p class="text-xs text-courtSlate-500 font-sans">
+                                Tentukan tanggal main atau aktifkan paket rutin mingguan.
+                            </p>
+                        </div>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex flex-wrap items-center gap-2.5">
                         <!-- Quick buttons -->
                         <button
                             type="button"
                             @click="setDateOffset(0)"
                             :class="[
                                 selectedDate === todayString
-                                    ? 'bg-indigo-600 text-white shadow-sm'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-                                'px-4 py-2 rounded-lg text-sm font-medium transition',
+                                    ? 'bg-arena-base text-volt shadow-xs -skew-x-3'
+                                    : 'bg-white text-courtSlate-700 hover:bg-courtSlate-100 border-2 border-courtSlate-200',
+                                'px-4 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider transition',
                             ]"
                         >
-                            Hari Ini
+                            <span :class="{ 'skew-x-3 inline-block': selectedDate === todayString }">Hari Ini</span>
                         </button>
                         <button
                             type="button"
                             @click="setDateOffset(1)"
                             :class="[
                                 selectedDate === new Date(Date.now() + 86400000).toISOString().split('T')[0]
-                                    ? 'bg-indigo-600 text-white shadow-sm'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-                                'px-4 py-2 rounded-lg text-sm font-medium transition',
+                                    ? 'bg-arena-base text-volt shadow-xs -skew-x-3'
+                                    : 'bg-white text-courtSlate-700 hover:bg-courtSlate-100 border-2 border-courtSlate-200',
+                                'px-4 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider transition',
                             ]"
                         >
-                            Besok
+                            <span :class="{ 'skew-x-3 inline-block': selectedDate === new Date(Date.now() + 86400000).toISOString().split('T')[0] }">Besok</span>
                         </button>
                         <button
                             type="button"
                             @click="setDateOffset(2)"
                             :class="[
                                 selectedDate === new Date(Date.now() + 172800000).toISOString().split('T')[0]
-                                    ? 'bg-indigo-600 text-white shadow-sm'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-                                'px-4 py-2 rounded-lg text-sm font-medium transition',
+                                    ? 'bg-arena-base text-volt shadow-xs -skew-x-3'
+                                    : 'bg-white text-courtSlate-700 hover:bg-courtSlate-100 border-2 border-courtSlate-200',
+                                'px-4 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider transition',
                             ]"
                         >
-                            Lusa
+                            <span :class="{ 'skew-x-3 inline-block': selectedDate === new Date(Date.now() + 172800000).toISOString().split('T')[0] }">Lusa</span>
                         </button>
 
                         <!-- Date input picker -->
                         <div class="flex items-center gap-2 ml-auto">
-                            <label for="date-picker" class="text-sm font-medium text-gray-700 hidden sm:inline">
+                            <label for="date-picker" class="text-xs font-display font-bold uppercase text-courtSlate-600 hidden sm:inline">
                                 Tanggal Spesifik:
                             </label>
                             <input
@@ -660,26 +689,27 @@ const submitBooking = () => {
                                 v-model="selectedDate"
                                 :min="todayString"
                                 :max="maxDateString"
-                                class="rounded-lg border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                class="rounded-xl border-2 border-courtSlate-200 px-3 py-1.5 text-xs font-sans text-courtSlate-800 shadow-xs focus:border-volt focus:ring-1 focus:ring-volt"
                             />
                         </div>
                     </div>
 
-                    <div class="mt-3 text-sm text-indigo-700 font-medium bg-indigo-50/60 px-3 py-1.5 rounded-lg inline-block">
-                        📅 Tanggal Terpilih: {{ formatDateIndonesian(selectedDate) }}
+                    <div class="mt-4 text-xs font-display font-bold text-arena-base bg-volt/15 border border-volt/30 px-3.5 py-2 rounded-xl inline-flex items-center gap-2">
+                        <span>📅 Tanggal Terpilih:</span>
+                        <span class="font-black">{{ formatDateIndonesian(selectedDate) }}</span>
                     </div>
                 </div>
 
                 <!-- STEP 3: GRID SLOT JAM -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div class="bg-white p-6 sm:p-7 rounded-2xl shadow-card-elevated border-2 border-courtSlate-200">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                         <div class="flex items-center gap-3">
-                            <span class="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-600 text-white font-bold text-sm">
-                                3
+                            <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-arena-base text-volt font-display font-black text-sm shadow-xs -skew-x-3">
+                                <span class="skew-x-3">3</span>
                             </span>
                             <div>
                                 <div class="flex items-center gap-2.5">
-                                    <h3 class="text-lg font-bold text-gray-900">
+                                    <h3 class="font-display font-black text-xl uppercase tracking-tight text-courtSlate-900">
                                         Pilih Slot Jam
                                     </h3>
                                     <!-- Live Real-Time Indicator Badge -->
@@ -691,33 +721,33 @@ const submitBooking = () => {
                                         <span>LIVE REAL-TIME</span>
                                     </div>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-0.5">
+                                <p class="text-xs text-courtSlate-500 font-sans mt-0.5">
                                     Klik slot untuk memilih. Anda bisa memilih beberapa slot berurutan.
                                 </p>
                             </div>
                         </div>
 
                         <!-- Legend Status -->
-                        <div class="flex flex-wrap items-center gap-3 text-xs">
+                        <div class="flex flex-wrap items-center gap-3 text-xs font-display font-bold uppercase tracking-wider">
                             <div class="flex items-center gap-1.5">
-                                <span class="w-3.5 h-3.5 rounded-md bg-emerald-500"></span>
-                                <span class="text-gray-700">Tersedia</span>
+                                <span class="w-3.5 h-3.5 rounded-md bg-emerald-500 shadow-xs"></span>
+                                <span class="text-courtSlate-700">Tersedia</span>
                             </div>
                             <div class="flex items-center gap-1.5">
-                                <span class="w-3.5 h-3.5 rounded-md bg-indigo-600"></span>
-                                <span class="text-gray-700">Dipilih</span>
+                                <span class="w-3.5 h-3.5 rounded-md bg-arena-base border border-volt text-volt flex items-center justify-center text-[8px] font-black shadow-xs">✓</span>
+                                <span class="text-courtSlate-900 font-black">Dipilih</span>
                             </div>
                             <div class="flex items-center gap-1.5">
-                                <span class="w-3.5 h-3.5 rounded-md bg-blue-500"></span>
-                                <span class="text-gray-700">Milik Saya</span>
+                                <span class="w-3.5 h-3.5 rounded-md bg-blue-500 shadow-xs"></span>
+                                <span class="text-courtSlate-700">Milik Saya</span>
                             </div>
                             <div class="flex items-center gap-1.5">
-                                <span class="w-3.5 h-3.5 rounded-md bg-amber-500"></span>
-                                <span class="text-gray-700">Turnamen / Tutup</span>
+                                <span class="w-3.5 h-3.5 rounded-md bg-amber-500 shadow-xs"></span>
+                                <span class="text-courtSlate-700">Turnamen / Tutup</span>
                             </div>
                             <div class="flex items-center gap-1.5">
-                                <span class="w-3.5 h-3.5 rounded-md bg-gray-300"></span>
-                                <span class="text-gray-500">Sudah Dibooking</span>
+                                <span class="w-3.5 h-3.5 rounded-md bg-courtSlate-300"></span>
+                                <span class="text-courtSlate-400">Sudah Dibooking</span>
                             </div>
                         </div>
                     </div>
@@ -762,19 +792,19 @@ const submitBooking = () => {
                     >
                         <div
                             v-if="realtimeNotification"
-                            class="mb-4 flex items-center justify-between rounded-lg bg-indigo-50 border border-indigo-200 px-4 py-2.5 text-xs sm:text-sm text-indigo-900 shadow-xs"
+                            class="mb-4 flex items-center justify-between rounded-xl bg-arena-base border-2 border-volt/40 px-4 py-3 text-xs sm:text-sm text-volt shadow-card-elevated"
                         >
-                            <div class="flex items-center gap-2">
-                                <span class="relative flex h-2 w-2">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+                            <div class="flex items-center gap-2.5">
+                                <span class="relative flex h-2.5 w-2.5">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-volt opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-volt"></span>
                                 </span>
-                                <span>{{ realtimeNotification }}</span>
+                                <span class="font-sans font-medium text-white">{{ realtimeNotification }}</span>
                             </div>
                             <button
                                 type="button"
                                 @click="realtimeNotification = ''"
-                                class="text-indigo-400 hover:text-indigo-600 font-bold ml-2 text-base leading-none"
+                                class="text-volt/70 hover:text-volt font-bold ml-2 text-base leading-none"
                             >
                                 &times;
                             </button>
@@ -796,30 +826,30 @@ const submitBooking = () => {
                             :disabled="slot.status !== 'available'"
                             :class="[
                                 selectedSlotTimes.includes(slot.start_time)
-                                    ? 'bg-indigo-600 text-white ring-2 ring-indigo-600 ring-offset-2 shadow-md'
+                                    ? 'bg-arena-base text-volt ring-2 ring-volt ring-offset-2 shadow-volt-glow-sm border-2 border-volt'
                                     : slot.status === 'available'
-                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300'
+                                    ? 'bg-emerald-50 text-emerald-800 border-2 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-400'
                                     : slot.status === 'mine'
-                                    ? 'bg-blue-100 text-blue-800 border border-blue-200 cursor-not-allowed'
+                                    ? 'bg-blue-100 text-blue-800 border-2 border-blue-200 cursor-not-allowed'
                                     : slot.status === 'closed'
                                     ? 'bg-amber-100/90 text-amber-950 border-2 border-amber-300 cursor-not-allowed shadow-xs'
                                     : slot.status === 'past'
-                                    ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60'
-                                    : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed',
-                                'relative flex flex-col items-center justify-center py-3 px-2 rounded-xl text-xs font-semibold transition-all duration-150',
+                                    ? 'bg-courtSlate-100 text-courtSlate-400 border-2 border-courtSlate-200 cursor-not-allowed opacity-60'
+                                    : 'bg-courtSlate-100 text-courtSlate-400 border-2 border-courtSlate-200 cursor-not-allowed',
+                                'relative flex flex-col items-center justify-center py-3.5 px-2 rounded-xl text-xs font-semibold transition-all duration-150',
                             ]"
                         >
-                            <span class="text-sm font-bold tracking-tight">
+                            <span class="text-sm font-display font-black tracking-tight">
                                 {{ slot.start_time }}
                             </span>
-                            <span class="text-[10px] mt-0.5 opacity-80">
+                            <span class="text-[10px] mt-0.5 opacity-80 font-sans">
                                 {{ slot.end_time }}
                             </span>
 
                             <!-- Badge on slot -->
                             <span
                                 v-if="selectedSlotTimes.includes(slot.start_time)"
-                                class="mt-1 text-[9px] bg-white text-indigo-700 px-1.5 py-0.2 rounded font-bold uppercase"
+                                class="mt-1 text-[9px] bg-volt text-volt-contrast px-1.5 py-0.2 rounded font-display font-black uppercase tracking-wider"
                             >
                                 Dipilih
                             </span>
@@ -941,51 +971,51 @@ const submitBooking = () => {
                             </div>
 
                             <!-- OPSI BOOKING RUTIN (MINGGUAN) -->
-                            <div class="rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 transition">
+                            <div class="rounded-2xl border-2 border-courtSlate-200 bg-courtSlate-50/70 p-5 transition">
                                 <div class="flex items-start justify-between gap-4">
                                     <div class="flex items-center gap-3">
                                         <input
                                             type="checkbox"
                                             id="is_recurring_checkbox"
                                             v-model="isRecurring"
-                                            class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                            class="w-5 h-5 rounded-lg border-2 border-courtSlate-300 text-arena-base focus:ring-volt cursor-pointer"
                                         />
                                         <div>
-                                            <label for="is_recurring_checkbox" class="text-sm font-bold text-gray-900 cursor-pointer flex items-center gap-1.5">
+                                            <label for="is_recurring_checkbox" class="text-sm font-display font-black uppercase text-courtSlate-900 cursor-pointer flex items-center gap-2">
                                                 <span>🔁 Jadikan Booking Rutin (Tiap Minggu)</span>
-                                                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">Maks. 3 Bulan</span>
+                                                <span class="text-[10px] font-display font-black tracking-wider uppercase px-2 py-0.5 rounded-full bg-volt text-arena-base border border-volt">Maks. 3 Bulan</span>
                                             </label>
-                                            <p class="text-xs text-gray-500 mt-0.5">
+                                            <p class="text-xs text-courtSlate-500 font-sans mt-0.5">
                                                 Otomatis dipesan setiap hari <strong>{{ selectedDayName }}</strong> jam <strong>{{ bookingStartTime }} - {{ bookingEndTime }}</strong> di lapangan yang sama.
                                             </p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div v-if="isRecurring" class="mt-4 pt-4 border-t border-indigo-100 space-y-4">
+                                <div v-if="isRecurring" class="mt-4 pt-4 border-t-2 border-courtSlate-200 space-y-4">
                                     <div>
-                                        <label class="block text-xs font-bold text-gray-700 mb-1.5">
+                                        <label class="block text-xs font-display font-bold uppercase text-courtSlate-600 mb-1.5">
                                             Pilih Durasi Rutin:
                                         </label>
                                         <div class="grid grid-cols-3 gap-2">
                                             <button
                                                 type="button"
                                                 @click="setRecurringWeeks(4)"
-                                                class="px-3 py-2 text-xs font-bold rounded-lg border border-indigo-200 bg-white hover:bg-indigo-50 text-indigo-700 transition text-center"
+                                                class="px-3 py-2 text-xs font-display font-black uppercase tracking-wider rounded-xl border-2 border-courtSlate-200 bg-white hover:bg-courtSlate-100 text-courtSlate-800 transition text-center shadow-xs"
                                             >
                                                 4 Minggu (1 Bulan)
                                             </button>
                                             <button
                                                 type="button"
                                                 @click="setRecurringWeeks(8)"
-                                                class="px-3 py-2 text-xs font-bold rounded-lg border border-indigo-200 bg-white hover:bg-indigo-50 text-indigo-700 transition text-center"
+                                                class="px-3 py-2 text-xs font-display font-black uppercase tracking-wider rounded-xl border-2 border-courtSlate-200 bg-white hover:bg-courtSlate-100 text-courtSlate-800 transition text-center shadow-xs"
                                             >
                                                 8 Minggu (2 Bulan)
                                             </button>
                                             <button
                                                 type="button"
                                                 @click="setRecurringWeeks(12)"
-                                                class="px-3 py-2 text-xs font-bold rounded-lg border border-indigo-200 bg-white hover:bg-indigo-50 text-indigo-700 transition text-center"
+                                                class="px-3 py-2 text-xs font-display font-black uppercase tracking-wider rounded-xl border-2 border-courtSlate-200 bg-white hover:bg-courtSlate-100 text-courtSlate-800 transition text-center shadow-xs"
                                             >
                                                 12 Minggu (3 Bulan)
                                             </button>
@@ -993,7 +1023,7 @@ const submitBooking = () => {
                                     </div>
 
                                     <div>
-                                        <label for="recurring_end_date" class="block text-xs font-bold text-gray-700 mb-1">
+                                        <label for="recurring_end_date" class="block text-xs font-display font-bold uppercase text-courtSlate-600 mb-1">
                                             Atau Tentukan Tanggal Berakhir:
                                         </label>
                                         <input
@@ -1002,24 +1032,24 @@ const submitBooking = () => {
                                             v-model="recurringEndDate"
                                             :min="minRecurringEndDate"
                                             :max="maxRecurringEndDate"
-                                            class="w-full text-sm rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                            class="w-full text-xs font-sans rounded-xl border-2 border-courtSlate-200 px-3 py-2 focus:border-volt focus:ring-1 focus:ring-volt shadow-xs"
                                         />
                                         <InputError class="mt-1" :message="form.errors.recurring_end_date" />
                                     </div>
 
                                     <!-- Summary Recurring Info -->
-                                    <div class="bg-white rounded-lg p-3 border border-indigo-100 flex items-center justify-between text-xs">
+                                    <div class="bg-white rounded-xl p-3.5 border-2 border-courtSlate-200 flex items-center justify-between text-xs">
                                         <div>
-                                            <span class="text-gray-500">Estimasi Sesi:</span>
-                                            <span class="font-bold text-gray-900 ml-1">{{ recurringSessionsCount }} Sesi Mingguan</span>
+                                            <span class="text-courtSlate-500 font-sans">Estimasi Sesi:</span>
+                                            <span class="font-display font-black text-courtSlate-900 ml-1 text-sm">{{ recurringSessionsCount }} Sesi Mingguan</span>
                                         </div>
                                         <div>
-                                            <span class="text-gray-500">Total Biaya Paket:</span>
-                                            <span class="font-black text-emerald-600 text-sm ml-1">{{ formatPrice(totalRecurringPrice) }}</span>
+                                            <span class="text-courtSlate-500 font-sans">Total Biaya Paket:</span>
+                                            <span class="font-display font-black text-emerald-600 text-base ml-1.5">{{ formatPrice(totalRecurringPrice) }}</span>
                                         </div>
                                     </div>
 
-                                    <p class="text-[11px] text-indigo-800 leading-tight">
+                                    <p class="text-[11px] text-courtSlate-600 leading-tight font-sans">
                                         ⚡ <strong>Anti-Bentrok Fleksibel:</strong> Jika salah satu minggu bentrok dengan pengguna lain, sistem otomatis melewati (skip) minggu tersebut tanpa membatalkan minggu lainnya.
                                     </p>
                                 </div>

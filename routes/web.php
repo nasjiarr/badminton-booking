@@ -66,6 +66,14 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::get('/closures', [\App\Http\Controllers\Admin\CourtClosureController::class, 'index'])->name('closures.index');
         Route::post('/closures', [\App\Http\Controllers\Admin\CourtClosureController::class, 'store'])->name('closures.store');
         Route::delete('/closures/{closure}', [\App\Http\Controllers\Admin\CourtClosureController::class, 'destroy'])->name('closures.destroy');
+
+        // User & Member Management
+        Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'show'])->name('users.show');
+        Route::patch('/users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.update-role');
+        Route::patch('/users/{user}/status', [\App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status');
+        Route::post('/users/{user}/adjust-points', [\App\Http\Controllers\Admin\UserController::class, 'adjustPoints'])->name('users.adjust-points');
+        Route::delete('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
     });
 
 // PWA Manifest & Service Worker root endpoints
