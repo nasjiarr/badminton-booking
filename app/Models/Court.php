@@ -49,5 +49,13 @@ class Court extends Model
     {
         return $this->hasMany(RecurringBooking::class);
     }
+
+    /**
+     * Get the closure schedules for this court.
+     */
+    public function closures(): HasMany
+    {
+        return $this->hasMany(CourtClosure::class);
+    }
 }
 

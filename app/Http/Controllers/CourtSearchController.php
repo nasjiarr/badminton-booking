@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Court;
+use App\Models\CourtClosure;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -90,7 +91,26 @@ class CourtSearchController extends Controller
                           $sub->where('start_time', '<', $endTime)
                               ->where('end_time', '>', $startTime);
                       });
+                })
+                // Closure check: must not have specific court closures overlapping with requested interval
+                ->whereDoesntHave('closures', function ($q) use ($date, $startTime, $endTime) {
+                    $q->whereDate('start_date', '<=', $date)
+                      ->whereDate('end_date', '>=', $date)
+                      ->where('start_time', '<', $endTime)
+                      ->where('end_time', '>', $startTime);
                 });
+
+            // Check if all courts are closed under a global closure
+            $hasGlobalClosure = CourtClosure::whereNull('court_id')
+                ->whereDate('start_date', '<=', $date)
+                ->whereDate('end_date', '>=', $date)
+                ->where('start_time', '<', $endTime)
+                ->where('end_time', '>', $startTime)
+                ->exists();
+
+            if ($hasGlobalClosure) {
+                $courtsQuery->whereRaw('1 = 0');
+            }
 
             // Sorting
             if ($sortBy === 'price_desc') {

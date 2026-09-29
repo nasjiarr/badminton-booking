@@ -34,6 +34,7 @@ const loadingSlots = ref(false);
 const selectedSlotTimes = ref([]); // array of 'HH:mm' start_times
 const notes = ref('');
 const realtimeNotification = ref('');
+const activeClosure = ref(null);
 
 let currentChannelId = null;
 let notificationTimeout = null;
@@ -185,6 +186,7 @@ const fetchAvailability = async () => {
         if (response.ok) {
             const data = await response.json();
             slots.value = data.slots || [];
+            activeClosure.value = data.active_closure || null;
 
             // Auto-select slots from search prefill if provided
             if (props.initialStartTime && props.initialEndTime && selectedSlotTimes.value.length === 0) {
@@ -199,9 +201,11 @@ const fetchAvailability = async () => {
             }
         } else {
             slots.value = [];
+            activeClosure.value = null;
         }
     } catch (e) {
         slots.value = [];
+        activeClosure.value = null;
     } finally {
         loadingSlots.value = false;
     }
@@ -708,9 +712,42 @@ const submitBooking = () => {
                                 <span class="text-gray-700">Milik Saya</span>
                             </div>
                             <div class="flex items-center gap-1.5">
+                                <span class="w-3.5 h-3.5 rounded-md bg-amber-500"></span>
+                                <span class="text-gray-700">Turnamen / Tutup</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
                                 <span class="w-3.5 h-3.5 rounded-md bg-gray-300"></span>
                                 <span class="text-gray-500">Sudah Dibooking</span>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Tournament / Closure Banner -->
+                    <div
+                        v-if="activeClosure"
+                        class="mb-4 rounded-xl border-2 border-amber-300 bg-amber-50/95 p-4 text-amber-900 shadow-xs flex items-start gap-3.5"
+                    >
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-xl shrink-0">
+                            🏆
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-display font-black tracking-wider uppercase bg-amber-200 text-amber-900 border border-amber-300">
+                                    {{ activeClosure.type_label || 'TURNAMEN' }}
+                                </span>
+                                <span class="text-xs text-amber-700 font-bold">
+                                    Jam: {{ activeClosure.start_time }} - {{ activeClosure.end_time }} WIB
+                                </span>
+                            </div>
+                            <h4 class="font-display font-black text-base text-amber-950 uppercase mt-1 tracking-tight">
+                                {{ activeClosure.name }}
+                            </h4>
+                            <p v-if="activeClosure.notes" class="text-xs text-amber-800 mt-1">
+                                {{ activeClosure.notes }}
+                            </p>
+                            <p class="text-[11px] text-amber-700 mt-1 font-medium">
+                                Lapangan tidak tersedia untuk reservasi umum pada jam yang telah dialokasikan untuk kegiatan ini.
+                            </p>
                         </div>
                     </div>
 
@@ -764,6 +801,8 @@ const submitBooking = () => {
                                     ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300'
                                     : slot.status === 'mine'
                                     ? 'bg-blue-100 text-blue-800 border border-blue-200 cursor-not-allowed'
+                                    : slot.status === 'closed'
+                                    ? 'bg-amber-100/90 text-amber-950 border-2 border-amber-300 cursor-not-allowed shadow-xs'
                                     : slot.status === 'past'
                                     ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60'
                                     : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed',
@@ -789,6 +828,13 @@ const submitBooking = () => {
                                 class="mt-1 text-[9px] bg-blue-600 text-white px-1.5 py-0.2 rounded font-bold"
                             >
                                 Milik Anda
+                            </span>
+                            <span
+                                v-else-if="slot.status === 'closed'"
+                                class="mt-1 text-[9px] bg-amber-500 text-white px-1.5 py-0.2 rounded font-bold uppercase truncate max-w-full"
+                                :title="slot.closure_name || 'Turnamen'"
+                            >
+                                {{ slot.closure_type === 'tournament' ? '🏆 Turnamen' : '🔒 Tutup' }}
                             </span>
                             <span
                                 v-else-if="slot.status === 'booked'"

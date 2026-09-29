@@ -7,6 +7,7 @@ use App\Events\BookingCreated;
 use App\Http\Requests\StoreBookingRequest;
 use App\Models\Booking;
 use App\Models\Court;
+use App\Models\CourtClosure;
 use App\Models\CourtSchedule;
 use App\Models\Payment;
 use App\Models\RecurringBooking;
@@ -83,6 +84,9 @@ class BookingController extends Controller
         $openHour = (int) explode(':', $openTime)[0];
         $closeHour = (int) explode(':', $closeTime)[0];
 
+        // Fetch active closures (tournaments / maintenance) for this court and date
+        $closures = CourtClosure::forCourtAndDate($court->id, $date->format('Y-m-d'))->get();
+
         // Fetch active bookings for this court and date (excluding cancelled)
         $bookings = Booking::where('court_id', $court->id)
             ->where('booking_date', $date->format('Y-m-d'))
@@ -98,16 +102,30 @@ class BookingController extends Controller
             $slotStart = sprintf('%02d:00', $hour);
             $slotEnd = sprintf('%02d:00', $hour + 1);
 
-            // Check if slot falls in any existing booking
+            // 1. Check if slot falls in any tournament / closure
+            $overlappingClosure = $closures->first(function ($closure) use ($slotStart, $slotEnd) {
+                $cStart = substr($closure->start_time, 0, 5);
+                $cEnd = substr($closure->end_time, 0, 5);
+                return $cStart < $slotEnd && $cEnd > $slotStart;
+            });
+
+            // 2. Check if slot falls in any existing booking
             $overlappingBooking = $bookings->first(function ($booking) use ($slotStart, $slotEnd) {
                 $bStart = substr($booking->start_time, 0, 5);
                 $bEnd = substr($booking->end_time, 0, 5);
                 return $bStart < $slotEnd && $bEnd > $slotStart;
             });
 
-            if ($overlappingBooking) {
+            if ($overlappingClosure) {
+                $status = 'closed';
+                $bookingId = null;
+                $closureName = $overlappingClosure->name;
+                $closureType = $overlappingClosure->type;
+            } elseif ($overlappingBooking) {
                 $status = ($currentUserId && $overlappingBooking->user_id === $currentUserId) ? 'mine' : 'booked';
                 $bookingId = $overlappingBooking->id;
+                $closureName = null;
+                $closureType = null;
             } else {
                 // If the slot is in the past for today, mark as unavailable
                 if ($isToday && $slotStart <= $currentTime) {
@@ -116,6 +134,8 @@ class BookingController extends Controller
                     $status = 'available';
                 }
                 $bookingId = null;
+                $closureName = null;
+                $closureType = null;
             }
 
             $slots[] = [
@@ -123,8 +143,12 @@ class BookingController extends Controller
                 'end_time' => $slotEnd,
                 'status' => $status,
                 'booking_id' => $bookingId,
+                'closure_name' => $closureName,
+                'closure_type' => $closureType,
             ];
         }
+
+        $activeClosure = $closures->first();
 
         return response()->json([
             'court_id' => $court->id,
@@ -132,6 +156,14 @@ class BookingController extends Controller
             'price_per_hour' => (float) $court->price_per_hour,
             'date' => $date->format('Y-m-d'),
             'slots' => $slots,
+            'active_closure' => $activeClosure ? [
+                'name' => $activeClosure->name,
+                'type' => $activeClosure->type,
+                'type_label' => $activeClosure->type_label,
+                'start_time' => substr($activeClosure->start_time, 0, 5),
+                'end_time' => substr($activeClosure->end_time, 0, 5),
+                'notes' => $activeClosure->notes,
+            ] : null,
         ]);
     }
 
@@ -220,6 +252,19 @@ class BookingController extends Controller
 
                  foreach ($candidateDates as $targetDate) {
                      $targetDateStr = $targetDate->format('Y-m-d');
+
+                     // Cek apakah jadwal lapangan ditutup untuk turnamen / maintenance
+                     $isClosed = CourtClosure::forCourtAndDate($court->id, $targetDateStr)
+                         ->where(function ($query) use ($startTime, $endTime) {
+                             $query->where('start_time', '<', $endTime)
+                                   ->where('end_time', '>', $startTime);
+                         })
+                         ->exists();
+
+                     if ($isClosed) {
+                         $skippedDates[] = $targetDateStr;
+                         continue;
+                     }
 
                      $conflict = Booking::where('court_id', $court->id)
                          ->where('booking_date', $targetDateStr)
@@ -330,6 +375,20 @@ class BookingController extends Controller
              if ($startTime < $openTime || $endTime > $closeTime) {
                  throw ValidationException::withMessages([
                      'slots' => "Jam booking harus berada di dalam jam operasional ({$openTime} - {$closeTime}).",
+                 ]);
+             }
+
+             // Cek apakah jadwal lapangan ditutup untuk turnamen / maintenance
+             $closure = CourtClosure::forCourtAndDate($court->id, $bookingDate)
+                 ->where(function ($query) use ($startTime, $endTime) {
+                     $query->where('start_time', '<', $endTime)
+                           ->where('end_time', '>', $startTime);
+                 })
+                 ->first();
+
+             if ($closure) {
+                 throw ValidationException::withMessages([
+                     'slots' => "Lapangan tidak tersedia pada jadwal ini karena sedang ditutup untuk: {$closure->name}.",
                  ]);
              }
 

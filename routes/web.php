@@ -61,6 +61,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export/excel', [\App\Http\Controllers\Admin\ReportController::class, 'exportExcel'])->name('reports.export.excel');
         Route::get('/reports/export/pdf', [\App\Http\Controllers\Admin\ReportController::class, 'exportPdf'])->name('reports.export.pdf');
+
+        // Court Closures & Tournaments
+        Route::get('/closures', [\App\Http\Controllers\Admin\CourtClosureController::class, 'index'])->name('closures.index');
+        Route::post('/closures', [\App\Http\Controllers\Admin\CourtClosureController::class, 'store'])->name('closures.store');
+        Route::delete('/closures/{closure}', [\App\Http\Controllers\Admin\CourtClosureController::class, 'destroy'])->name('closures.destroy');
     });
 
 // PWA Manifest & Service Worker root endpoints

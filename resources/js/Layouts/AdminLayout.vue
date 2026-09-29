@@ -33,6 +33,13 @@ const navigation = [
         badge: 'Segera',
     },
     {
+        name: 'Jadwal & Turnamen',
+        href: route('admin.closures.index'),
+        icon: 'M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0H9.496m0 0A2.25 2.25 0 017.25 12V6.75a2.25 2.25 0 012.25-2.25h5a2.25 2.25 0 012.25 2.25V12a2.25 2.25 0 01-2.246 2.25z',
+        active: route().current('admin.closures.*'),
+        disabled: false,
+    },
+    {
         name: 'Laporan',
         href: route('admin.reports.index'),
         icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
