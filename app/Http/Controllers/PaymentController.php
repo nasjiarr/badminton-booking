@@ -31,9 +31,9 @@ class PaymentController extends Controller
                 ->with('info', 'Pembayaran untuk booking ini sudah lunas.');
         }
 
-        if ($payment->isExpired() || $payment->isFailed() || $payment->booking->status === 'cancelled') {
+        if ($this->handlePotentialExpiry($payment)) {
             return redirect()->route('my-bookings.index')
-                ->with('error', 'Waktu pembayaran telah habis atau booking telah dibatalkan.');
+                ->with('error', 'Waktu pembayaran telah habis (15 menit) atau booking telah dibatalkan.');
         }
 
         $paymentData = $this->formatPaymentData($payment);
@@ -57,9 +57,9 @@ class PaymentController extends Controller
             return redirect()->route('payments.invoice', $payment->id);
         }
 
-        if ($payment->isExpired() || $payment->isFailed() || $payment->booking->status === 'cancelled') {
+        if ($this->handlePotentialExpiry($payment)) {
             return redirect()->route('my-bookings.index')
-                ->with('error', 'Waktu pembayaran telah habis atau booking telah dibatalkan.');
+                ->with('error', 'Waktu pembayaran telah habis (15 menit) atau booking telah dibatalkan.');
         }
 
         $validated = $request->validate([
@@ -101,9 +101,9 @@ class PaymentController extends Controller
                 ->with('success', 'Pembayaran telah berhasil diverifikasi.');
         }
 
-        if ($payment->isExpired() || $payment->isFailed() || $payment->booking->status === 'cancelled') {
+        if ($this->handlePotentialExpiry($payment)) {
             return redirect()->route('my-bookings.index')
-                ->with('error', 'Waktu pembayaran telah habis atau booking telah dibatalkan.');
+                ->with('error', 'Waktu pembayaran telah habis (15 menit) atau booking telah dibatalkan.');
         }
 
         $paymentData = $this->formatPaymentData($payment);
@@ -124,9 +124,9 @@ class PaymentController extends Controller
             return redirect()->route('payments.invoice', $payment->id);
         }
 
-        if ($payment->isExpired() || $payment->isFailed() || $payment->booking->status === 'cancelled') {
+        if ($this->handlePotentialExpiry($payment)) {
             return redirect()->route('my-bookings.index')
-                ->with('error', 'Booking ini sudah tidak dapat dibayar.');
+                ->with('error', 'Booking ini sudah tidak dapat dibayar (batas waktu 15 menit habis).');
         }
 
         $booking = $payment->booking;
@@ -233,7 +233,11 @@ class PaymentController extends Controller
 
             // Broadcast real-time slot release for each session
             foreach ($allBookings as $b) {
-                event(new BookingCancelled($b));
+                try {
+                    event(new BookingCancelled($b));
+                } catch (\Throwable $e) {
+                    Log::warning("Gagal broadcast real-time BookingCancelled #{$b->id}: " . $e->getMessage());
+                }
             }
 
             if ($booking->user) {
@@ -262,7 +266,11 @@ class PaymentController extends Controller
         });
 
         // Broadcast real-time slot release
-        event(new BookingCancelled($payment->booking));
+        try {
+            event(new BookingCancelled($payment->booking));
+        } catch (\Throwable $e) {
+            Log::warning("Gagal broadcast real-time BookingCancelled #{$payment->booking->id}: " . $e->getMessage());
+        }
 
         // Send cancellation notification
         if ($payment->booking->user) {
@@ -330,6 +338,54 @@ class PaymentController extends Controller
     /**
      * Format payment and booking data for frontend views.
      */
+    
+    /**
+     * Check if payment has exceeded the 15-minute window and auto-expire it if pending.
+     */
+    protected function handlePotentialExpiry(Payment $payment): bool
+    {
+        if ($payment->isPaid()) {
+            return false;
+        }
+
+        if ($payment->isExpired() || $payment->isFailed() || $payment->booking->status === 'cancelled') {
+            return true;
+        }
+
+        $booking = $payment->booking;
+        $isOlderThan15Min = $booking->created_at && $booking->created_at->addMinutes(15)->isPast();
+
+        if ($booking->status === 'pending' && $isOlderThan15Min) {
+            DB::transaction(function () use ($booking, $payment) {
+                $booking->update(['status' => 'cancelled']);
+                $payment->update(['status' => 'expired']);
+
+                if ($booking->is_recurring && $booking->recurring_booking_id) {
+                    $recurring = $booking->recurringBooking;
+                    if ($recurring) {
+                        $recurring->update(['status' => 'cancelled']);
+                        foreach ($recurring->bookings as $sb) {
+                            $sb->update(['status' => 'cancelled']);
+                            if ($sb->payment) {
+                                $sb->payment->update(['status' => 'expired']);
+                            }
+                        }
+                    }
+                }
+            });
+
+            try {
+                event(new \App\Events\BookingCancelled($booking));
+            } catch (\Throwable $e) {
+                Log::warning("Gagal broadcast real-time BookingCancelled #{$booking->id}: " . $e->getMessage());
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
     protected function formatPaymentData(Payment $payment): array
     {
         $payment->loadMissing(['booking.court', 'booking.user']);

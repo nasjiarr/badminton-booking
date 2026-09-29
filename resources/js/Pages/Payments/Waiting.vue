@@ -32,6 +32,10 @@ onMounted(() => {
     timerInterval = setInterval(() => {
         if (remainingSeconds.value > 0) {
             remainingSeconds.value--;
+            if (remainingSeconds.value === 0) {
+                clearInterval(timerInterval);
+                router.reload();
+            }
         } else {
             clearInterval(timerInterval);
         }

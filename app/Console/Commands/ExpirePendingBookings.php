@@ -56,7 +56,11 @@ class ExpirePendingBookings extends Command
             });
 
             // Broadcast real-time cancellation event to free court slots
-            event(new BookingCancelled($booking));
+            try {
+                event(new BookingCancelled($booking));
+            } catch (\Throwable $e) {
+                Log::warning("Gagal broadcast real-time BookingCancelled #{$booking->id}: " . $e->getMessage());
+            }
 
             // Notify customer
             if ($booking->user) {

@@ -145,7 +145,11 @@ class RecurringBookingController extends Controller
 
         // Broadcast real-time slot release for each cancelled session
         foreach ($cancelledBookings as $b) {
-            event(new BookingCancelled($b));
+            try {
+                event(new BookingCancelled($b));
+            } catch (\Throwable $e) {
+                Log::warning("Gagal broadcast real-time BookingCancelled #{$b->id}: " . $e->getMessage());
+            }
         }
 
         // Notify user
